@@ -1,0 +1,8 @@
+/.idea
+/.idea/sonarlint/securityhotspotstore
+.idea/sonarlint/securityhotspotstore/index.pb
+/.idea/sonarlint
+/.idea
+server/Cargo.lock
+*.lock
+/.idea

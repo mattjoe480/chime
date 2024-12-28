@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package events;
+import "google/protobuf/timestamp.proto";
+
+// Enum for success codes
+enum SuccessCode {
+  SUCCESS_UNKNOWN = 0;  // Default unknown success status
+  MESSAGE_SENT = 1;     // Message was successfully sent
+  KEY_EXCHANGE_COMPLETED = 2; // Key exchange was successfully completed
+  MESSAGE_DELIVERED = 3; // Message was delivered successfully
+  SESSION_ESTABLISHED = 4; // Session was successfully established
+  
+}
+
+enum MessageCommand {
+  MESSAGE_SEND = 0;              // Send a new message
+  MESSAGE_RECEIVE = 1;           // Receive a message
+  UPDATE_TIMESTAMP = 2;          // Update the timestamp (e.g., resend or reattempt)
+  EDIT_MESSAGE = 3;              // Edit the content of an existing message
+  DELETE_MESSAGE = 4;            // Delete the message from the system
+  FORWARD_MESSAGE = 5;           // Forward the message to other users
+  RETRY_SEND = 6;                // Retry sending a message (e.g., after failure)
+  MARK_AS_IMPORTANT = 7;         // Mark the message as important
+  ARCHIVE_MESSAGE = 8;           // Archive the message (for storage)
+  UNARCHIVE_MESSAGE = 9;         // Unarchive a previously archived message
+  MARK_AS_SPAM = 10;             // Mark the message as spam
+  MARK_AS_READ = 11;             // Mark the message as read (may be used explicitly)
+  MARK_AS_UNREAD = 12;           // Mark the message as unread
+  REVOKE_MESSAGE = 13;           // Revoke a message (remove it from recipients' devices)
+  PIN_MESSAGE = 14;              // Pin the message to the top of a chat or thread
+  UNPIN_MESSAGE = 15;            // Unpin a previously pinned message
+}
+
+// Enum for message statuses
+enum MessageStatus {
+  PENDING = 0;                  // Message has been sent but not yet delivered
+  DELIVERED = 1;                // Message delivered to recipients
+  READ = 2;                     // Message read by the recipient
+  FAILED = 3;                   // Message failed to send or deliver
+}
+
+// Message structure with optional text, audio, and files
+message Message {
+  MessageStatus status = 1;            // Current status of the message
+  google.protobuf.Timestamp send_time = 2;      // Time the message was sent
+  google.protobuf.Timestamp delivered_time = 3; // Time the message was delivered
+  google.protobuf.Timestamp read_time = 4;      // Time the message was read
+  oneof data {
+    string text = 5;                   // Text message
+    bytes audio = 6;                   // Audio message (raw audio data)
+    bytes video = 7;                   // Video message (raw video data)
+    bytes document = 8;                // Document file (e.g., PDF, Word)
+    bytes image = 9;                   // Image file (e.g., JPEG, PNG)
+    bytes file = 10;                   // Generic file
+    string url = 11;                    //Link
+  }
+  string uid = 13;                    // Unique ID for the message (different from sender_uid)
+}
+
+
+// MessageEvent structure for sending/receiving messages
+message MessageEvent {
+  MessageCommand command = 1;         // The action (e.g., send, receive, edit)
+  string event_uid = 2;                    // Unique ID for the message (different from sender_uid)
+  string sender_uid = 3;             // Sender's user ID
+  repeated string dst_uids = 4;      // List of recipient user IDs
+  Message message = 5;               // The message content
+}
+
+// Typing event (optional for "user typing" notifications)
+message TypingEvent {
+  string sender_uid = 1;              // Sender's user ID
+  repeated string dst_uids = 2;       // List of recipient user IDs
+  bool is_typing = 3;                 // Whether the user is typing
+}
+
+// User status event (optional for online/offline status)
+message UserStatusEvent {
+  string user_uid = 1;                // User's unique ID
+  bool is_online = 2;                 // Whether the user is online
+}
+
+// Message status update (optional for message read/delivered status change)
+message MessageStatusUpdate {
+  string message_uid = 1;             // Unique message ID
+  MessageStatus new_status = 2;       // New status (e.g., "delivered")
+}
+
+// Key exchange message for secure communication
+message KeyExchange {
+  string sender_uid = 1;               // Sender's user ID
+  bytes identity_key = 2;              // Sender's identity public key (Curve25519)
+  bytes signed_pre_key = 3;            // Sender's signed pre-key (Curve25519)
+  bytes signed_pre_key_signature = 4;  // Signature of the signed pre-key
+  bytes one_time_pre_key = 5;          // Sender's one-time pre-key (Curve25519)
+  bytes one_time_pre_key_signature = 6; // Signature of the one-time pre-key
+  bytes ephemeral_key = 7;             // Ephemeral public key (Curve25519)
+  bytes encrypted_data = 8;            // Optional encrypted data (for session data)
+  string signature = 9;                // Digital signature of the sender to verify the authenticity
+}
+
+// SuccessEvent to indicate successful operation (e.g., message sent, key exchange successful)
+message SuccessEvent {
+  string event_uid = 1;                // Unique ID for the event (to track the success)
+  SuccessCode success_code = 2;        // Code indicating the success type (e.g., MESSAGE_SENT)
+  string description = 3;              // Optional description providing additional context (e.g., "Message Sent")
+}
+
+// Wrapper for different types of events (oneof for multiple event types)
+message Events {
+  oneof event {
+    MessageEvent message_event = 1;       // New message event
+    TypingEvent typing_event = 2;         // Typing status event
+    UserStatusEvent user_status_event = 3; // User status event
+    MessageStatusUpdate status_update = 4; // Message status update event
+    KeyExchange key_exchange_event = 5;    // Key exchange event
+    SuccessEvent success_event = 6;        // Success event
+  }
+}
+
+service Chat{
+  rpc MessageService(stream Events) returns (stream Events);
+}

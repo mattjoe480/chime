@@ -1,0 +1,60 @@
+syntax = "proto3";
+package auth;
+
+import "google/protobuf/timestamp.proto";
+
+
+enum Status {
+  AUTH_SUCCESS = 0;
+  AUTH_FAILED = 1;
+  INVALID_CREDENTIALS = 2;
+  EXPIRED_TOKEN = 3;          // Token has expired and needs to be refreshed
+  ACCOUNT_LOCKED = 4;         // Account is locked due to multiple failed login attempts
+  USER_NOT_FOUND = 5;         // User does not exist
+  INVALID_PASSWORD = 6;       // The password provided is incorrect
+}
+
+message Token {
+  string uid = 1;                        // User's unique identifier
+  string email = 2;                      // User's email address
+  string access_token = 3;               // Access token for authentication
+  string refresh_token = 4;              // Refresh token to obtain a new access token
+  Status status = 5;                     // Authentication status
+  string error_message = 6;              // Optional field for detailed error message
+  google.protobuf.Timestamp access_token_expiration = 7;  // Expiration timestamp of access token
+  google.protobuf.Timestamp refresh_token_expiration = 8; // Expiration timestamp of refresh token
+  bool mfa_required = 9;                // Whether MFA is required (optional)
+  google.protobuf.Timestamp last_login = 10;  // Timestamp of last successful login
+}
+
+message Credentials{
+  string email = 1;
+  string password = 2;
+  string client_id = 3;
+}
+
+message AuthToken{
+  string token = 1;
+  Status status = 2;
+  string error_message = 3;
+}
+message RefreshToken{
+  string token = 1;
+}
+
+message Revoke{
+  string message = 1;
+  Status status = 2;
+}
+message AccessToken{
+  string token = 1;
+}
+message Login{
+  bool canLogin = 1;
+}
+
+service auth{
+  rpc auth(Credentials) returns (Token);
+  rpc token(RefreshToken) returns(AuthToken);
+  rpc revoke(RefreshToken) returns(Revoke);
+}
