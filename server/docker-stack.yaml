@@ -1,11 +1,13 @@
 services:
   rust-server:
-    network_mode: host  # Use host network for rust-server
     image: ghcr.io/mattjoe480/chime/api-server:latest
+    ports:
+      - "8080:8080"
+      - "50051:50051"
     environment:
       - RUST_LOG=info
-      - MONGO_URI=mongodb://127.0.0.1:27017  # Use localhost as MongoDB URI
-      - REDIS_URI=redis://127.0.0.1:6379  # Use localhost as Redis URI
+      - MONGO_URI=mongodb://mongodb:27017  # Use localhost as MongoDB URI
+      - REDIS_URI=redis://redis:6379  # Use localhost as Redis URI
       - GRPC_URL=0.0.0.0:50051  # Bind GRPC server to all interfaces
       - JWT_ACCESS_TOKEN_TTL=1
       - JWT_TTL=1
