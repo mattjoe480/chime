@@ -40,17 +40,20 @@ pub async fn login_controller(login_data: Json<LoginData>) -> impl Responder {
                             .json(json!({"Token": jwt.trim()}))
                     },
                     Err(e) => {
+                        info!("Time to err token: {}", time.elapsed().as_millis());
                         error!("Error generating jwt: {}", e);
                         HttpResponse::InternalServerError().finish()
                     }
                 }
             }
             false => {
+                info!("Time to err: {}", time.elapsed().as_millis());
                 info!("User with email id {} failed logged in successfully", user.email.clone());
                 HttpResponse::Unauthorized().finish()
             }
         }
-    }else { 
+    }else {
+        info!("Time to err {}", time.elapsed().as_millis());
         info!("User with email id {} not found failed to login", login_data.email.clone());
         HttpResponse::Unauthorized().finish()
     }

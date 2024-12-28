@@ -13,6 +13,7 @@ impl DatabaseCon{
         let mut client_options = ClientOptions::parse(get_mongodb_uri().await).await?;
         let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
         client_options.server_api = Some(server_api);
+        client_options.max_pool_size = Some(20);
         Client::with_options(client_options)
     }
     pub async fn new() -> DatabaseCon {

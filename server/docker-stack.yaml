@@ -1,21 +1,18 @@
 services:
   rust-server:
     container_name: rust-server
-    image: ghcr.io/mattjoe480/chime/api-server:latest
-    ports:
-      - "8080:8080"
-      - "50051:50051"
+    network_mode: host
+    image: ghcr.io/mattjoe480/chime/api-server:${GIT_COMMIT_HASH:-latest}
     environment:
       - RUST_LOG=info
-      - MONGO_URI=mongodb://127.0.0.1:27017  # Use localhost as MongoDB URI
-      - REDIS_URI=redis://127.0.0.1:6379  # Use localhost as Redis URI
+      - MONGO_URI=mongodb://admin:example@localhost:27018  # Use localhost as MongoDB URI
+      - REDIS_URI=redis://localhost:6379  # Use localhost as Redis URI
       - GRPC_URL=0.0.0.0:50051  # Bind GRPC server to all interfaces
       - JWT_ACCESS_TOKEN_TTL=1
       - JWT_TTL=1
       - JWT_TOKEN_TOKEN_TTL=720
       - JWT_KEY=testingkey
       - JWT_REFRESH_KEY=testingrefreshkey
-
     deploy:
       update_config:
         order: start-first
@@ -52,7 +49,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=example
     ports:
-      - "27017:27017"
+      - "27018:27017"
     restart: unless-stopped
 volumes:
   mongodb_data:

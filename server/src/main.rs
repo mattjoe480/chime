@@ -23,8 +23,8 @@ async fn main() -> std::io::Result<()> {
     initialize_all().await;
     let key = get_jwt_secret_key().await;
     Grpc::build();
-    
-        
+
+
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
@@ -34,5 +34,5 @@ async fn main() -> std::io::Result<()> {
         .bind("0.0.0.0:8080")?
         .run()
         .await
-    
+
 }

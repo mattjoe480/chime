@@ -1,3 +1,4 @@
+use std::time::Instant;
 use argon2::{password_hash, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
@@ -80,19 +81,21 @@ impl User {
         }
     }
     pub async fn find_by_email(email: &str)->Result<User, ()>{
+        let time = Instant::now();
         let db = get_db_conn().await;
+        info!("Time to get conn {}", time.elapsed().as_millis());
         match db.find_one(doc! {"email": email}).await{
             Ok(user) => {
                 if let Some(item) = user {
-                    info!("User found with email: {}", email);
+                    info!("User found with email: {} time to fetch {}", email, time.elapsed().as_millis());
                     Ok(item)
                 }else {
-                    warn!("User with email {} not found", email);
+                    warn!("User with email {} not found time to fetch {}", email, time.elapsed().as_millis());
                     Err(())
                 }
             }
             Err(_) => {
-                warn!("User with email {} not found", email);
+                warn!("User with email {} not found time to fetch {}", email, time.elapsed().as_millis());
                 Err(())
             }
         }
