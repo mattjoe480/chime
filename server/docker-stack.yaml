@@ -1,5 +1,6 @@
 services:
   rust-server:
+    container_name: rust-server
     image: ghcr.io/mattjoe480/chime/api-server:latest
     ports:
       - "8080:8080"
