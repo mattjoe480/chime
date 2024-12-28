@@ -3,7 +3,7 @@ LABEL authors="invin"
 
 WORKDIR /usr/src/server
 
-COPY Cargo.toml .env build.rs ./
+COPY Cargo.toml build.rs ./
 
 RUN apt-get update && apt-get install -y protobuf-compiler musl-tools
 RUN rustup target add x86_64-unknown-linux-musl
