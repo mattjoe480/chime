@@ -12,13 +12,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
           registry: https://ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -26,8 +28,8 @@ jobs:
           context: ./server
           push: true
           tags: |
-            ghcr.io/mattjoe480/chime/api-server:latest
-            ghcr.io/mattjoe480/chime/api-server:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/chime-api-server:latest
+            ghcr.io/${{ github.repository_owner }}/chime-api-server:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -36,6 +38,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: create env file
         run: |

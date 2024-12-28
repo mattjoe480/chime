@@ -52,5 +52,5 @@ services:
       - "27017:27017"
     restart: unless-stopped
 volumes:
-  mongodb_data:  # Define the volume her
-    driver: local  # (optional, the default is local)
+  mongodb_data:
+    driver: local
