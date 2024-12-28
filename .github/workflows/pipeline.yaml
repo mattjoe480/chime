@@ -30,6 +30,8 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/chime/api-server:latest
             ghcr.io/${{ github.repository_owner }}/chime/api-server:${{ github.sha }}
+          cache-from: type=registry,ref=mattjoe480/chime-api-server:cache
+          cache-to: type=registry,ref=mattjoe480/chime-api-server:cache,mode=max
 
   deploy:
     runs-on: ubuntu-latest
