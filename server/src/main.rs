@@ -13,11 +13,11 @@ use actix_web::{get, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use tracing_actix_web::TracingLogger;
 use crate::rpc::events::metrics_handler;
 
-#[get("/test")]
-async fn test_api(_req: HttpRequest) -> Result<HttpResponse, Error>{
-    Ok(HttpResponse::Ok().json("Hello"))
-}
-
+// #[get("/test")]
+// async fn test_api(_req: HttpRequest) -> Result<HttpResponse, Error>{
+//     Ok(HttpResponse::Ok().json("Hello"))
+// }
+// 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     initialize_all().await;

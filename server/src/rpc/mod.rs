@@ -52,7 +52,6 @@ fn is_valid_token(token: &str) -> BoxFuture<bool> {
     }).boxed()
 }
 fn check_auth(req: Request<()>) -> Result<Request<()>, Status> {
-    return Ok(req);
     match req.metadata().get("authorization") {
         Some(t) =>{
             let auth_str = t.to_str().unwrap_or(""); 

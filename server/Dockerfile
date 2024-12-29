@@ -14,16 +14,10 @@ COPY . .
 RUN cargo build --release --target x86_64-unknown-linux-musl --bin server
 
 
-
-FROM alpine:latest
-
-FROM alpine AS runtime
-
-RUN addgroup -S myuser && adduser -S myuser -G myuser
+FROM gcr.io/distroless/static-debian12:latest-amd64 AS runtime
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/server /usr/local/bin/
 EXPOSE 8080
 EXPOSE 50051
 
-USER myuser
 CMD ["server"]

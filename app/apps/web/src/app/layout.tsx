@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {ThemeProvider} from "@/components/theme-provider";
 import Image from "next/image";
-import React from "react";
 import Logo from './icons/brand.svg';
+import {ReactNode} from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: "World's first AI health app",
 };
 
-export default function RootLayout({children,}: Readonly<{ children: React.ReactNode;
+export default function RootLayout({children,}: Readonly<{ children: ReactNode;
 }>) {
     return (
     <html lang="en" suppressHydrationWarning>

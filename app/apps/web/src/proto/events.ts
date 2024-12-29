@@ -3,7 +3,7 @@
  * compiler version: 5.28.3
  * source: events.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
-import * as dependency_1 from "./google\\protobuf\\timestamp";
+import * as dependency_1 from "@/proto/google/protobuf/timestamp";
 import * as pb_1 from "google-protobuf";
 import * as grpc_1 from "@grpc/grpc-js";
 export namespace events {
