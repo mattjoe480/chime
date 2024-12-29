@@ -37,7 +37,7 @@ WORKDIR /app
 
 # Copy in the built files. Automatically leverage output traces to reduce image
 # size: https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --chown=nonroot:nonroot --from=installer /app/.env.production .
+#COPY --chown=nonroot:nonroot --from=installer /app/.env.production .
 COPY --chown=nonroot:nonroot --from=installer /app/next.config.ts .
 COPY --chown=nonroot:nonroot --from=installer /app/package.json .
 COPY --chown=nonroot:nonroot --from=installer /app/.next/standalone ./
