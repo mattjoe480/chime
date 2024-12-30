@@ -1,12 +1,9 @@
 use prometheus::core::Collector;
 use std::collections::HashMap;
-use crate::rpc::proto::chat_server::Chat;
-use crate::rpc::proto::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use actix_web::Responder;
-use lazy_static::lazy_static;
-use prometheus::{Encoder, TextEncoder, Counter, HistogramVec, Registry, register_counter, register_histogram_vec};
+use prometheus::{Encoder, TextEncoder};
 use prometheus::proto::MetricFamily;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
@@ -14,9 +11,11 @@ use tokio_stream::{Stream, StreamExt};
 use tonic::{Request, Response, Status, Streaming};
 use tracing::{info, warn};
 use crate::model::credentials::Token;
+use crate::proto::types::chat_server::Chat;
+use crate::proto::types::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
+use crate::proto::types::events::events::Event;
 use crate::rpc::{CLIENT_MANAGER, EVENT_REQUESTS_TOTAL, EVENT_REQUEST_DURATION};
 use crate::rpc::message::MessageEventService;
-use crate::rpc::proto::events::Event;
 
 pub struct ChatServerImpl;
 

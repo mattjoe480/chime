@@ -12,9 +12,10 @@ use mongodb::bson::DateTime;
 use tracing::info;
 use crate::model::credentials;
 use crate::model::user::User;
+use crate::proto::types;
 use crate::rpc::proto;
-use crate::rpc::proto::auth_server::Auth;
-use crate::rpc::proto::{AuthToken, Credentials, RefreshToken, Revoke, Token};
+use crate::proto::types::auth_server::Auth;
+use crate::proto::types::{AuthToken, Credentials, RefreshToken, Revoke, Token};
 
 lazy_static!{
     static ref jwt_secret_key: Arc<String> = Arc::new(std::env::var("JWT_KEY")
@@ -84,7 +85,7 @@ impl Auth for AuthServerImpl {
         let cred = request.into_inner();
         if let Ok(user) = User::find_by_email(&cred.email).await{
             if !user.verify_password(&cred.password).await { 
-                return Self::error(proto::Status::InvalidCredentials, "InvalidCredentials Username/Password");
+                return Self::error(types::Status::InvalidCredentials, "InvalidCredentials Username/Password");
             }
             let attl = access_token_ttl.parse()
                 .expect("Invalid access token ttl");
@@ -115,7 +116,7 @@ impl Auth for AuthServerImpl {
             }))
         }
         else {
-            Self::error(proto::Status::InvalidCredentials, "InvalidCredentials Username/Password")
+            Self::error(types::Status::InvalidCredentials, "InvalidCredentials Username/Password")
         }
     }
 
@@ -144,7 +145,7 @@ impl Auth for AuthServerImpl {
 }
 
 impl AuthServerImpl {
-    fn error(status: proto::Status, msg: &str) -> Result<Response<Token>, Status>{
+    fn error(status: types::Status, msg: &str) -> Result<Response<Token>, Status>{
         let null = "".to_string();
         Ok(Response::new(Token{
             uid: null.clone(),

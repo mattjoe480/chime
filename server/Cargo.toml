@@ -16,8 +16,6 @@ version = "0.0.1"
 build = "build.rs"
 
 [dependencies]
-actix-rt = "2.5"
-actix-service = "2.0.2"
 actix-web = "4.0"
 argon2 = "0.5.3"
 chrono = "0.4.38"

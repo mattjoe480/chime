@@ -11,13 +11,12 @@ use tonic::transport::Server;
 use tonic_reflection::server::Builder;
 use tracing::debug;
 use crate::model::credentials::Token;
+use crate::proto::types::auth_server::AuthServer;
+use crate::proto::types::chat_server::ChatServer;
+use crate::proto::types::ping_server::PingServer;
 use crate::rpc::auth::AuthServerImpl;
 use crate::rpc::events::{ChatServerImpl, ClientManager};
 use crate::rpc::ping::PingPongImpl;
-use crate::rpc::proto::auth_server::AuthServer;
-use crate::rpc::proto::chat_server::ChatServer;
-use crate::rpc::proto::ping_server::PingServer;
-
 pub mod ping;
 pub mod message;
 pub mod events;
@@ -37,9 +36,7 @@ lazy_static! {
     ).unwrap();
 }
 pub mod proto{
-    tonic::include_proto!("ping");
-    tonic::include_proto!("events");
-    tonic::include_proto!("auth");
+    use crate::proto::types::*;
     pub (crate) const FILE_DESCRIPTOR_SET: &[u8] =
         tonic::include_file_descriptor_set!("server_descriptor");
 }

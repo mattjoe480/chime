@@ -1,7 +1,7 @@
-use std::fmt;
-use crate::rpc::proto;
-use serde::{Deserialize, Serialize};
+use crate::proto::types;
 use prost_types::Timestamp as ProtoTimestamp;
+use serde::{Deserialize, Serialize};
+use std::fmt;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Timestamp {
@@ -138,9 +138,9 @@ impl Into<ProtoTimestamp> for Timestamp {
     }
 }
 
-impl Into<proto::Message> for Message {
-    fn into(self) -> proto::Message {
-        proto::Message {
+impl Into<types::Message> for Message {
+    fn into(self) -> types::Message {
+        types::Message {
             status: self.status.into(),
             send_time: self.send_time.map(|t| t.into()),
             delivered_time: self.delivered_time.map(|t| t.into()),
@@ -151,23 +151,23 @@ impl Into<proto::Message> for Message {
     }
 }
 
-impl Into<proto::message::Data> for Data {
-    fn into(self) -> proto::message::Data {
+impl Into<types::message::Data> for Data {
+    fn into(self) -> types::message::Data {
         match self {
-            Data::Text(text) => proto::message::Data::Text(text),
-            Data::Audio(audio) => proto::message::Data::Audio(audio),
-            Data::Video(video) => proto::message::Data::Video(video),
-            Data::Document(document) => proto::message::Data::Document(document),
-            Data::Image(image) => proto::message::Data::Image(image),
-            Data::File(file) => proto::message::Data::File(file),
-            Data::Url(url) => proto::message::Data::Url(url),
+            Data::Text(text) => types::message::Data::Text(text),
+            Data::Audio(audio) => types::message::Data::Audio(audio),
+            Data::Video(video) => types::message::Data::Video(video),
+            Data::Document(document) => types::message::Data::Document(document),
+            Data::Image(image) => types::message::Data::Image(image),
+            Data::File(file) => types::message::Data::File(file),
+            Data::Url(url) => types::message::Data::Url(url),
         }
     }
 }
 
-impl Into<proto::MessageEvent> for MessageEvent {
-    fn into(self) -> proto::MessageEvent {
-        proto::MessageEvent {
+impl Into<types::MessageEvent> for MessageEvent {
+    fn into(self) -> types::MessageEvent {
+        types::MessageEvent {
             command: self.command.into(),
             event_uid: self.event_uid,
             sender_uid: self.sender_uid,
@@ -213,7 +213,7 @@ impl Into<MessageCommand> for i32 {
     }
 }
 
-impl Into<Message> for proto::Message {
+impl Into<Message> for types::Message {
     fn into(self) -> Message {
         Message {
             status: self.status.into(),
@@ -235,21 +235,21 @@ impl Into<Timestamp> for ProtoTimestamp {
     }
 }
 
-impl Into<Data> for proto::message::Data {
+impl Into<Data> for types::message::Data {
     fn into(self) -> Data {
         match self {
-            proto::message::Data::Text(text) => Data::Text(text),
-            proto::message::Data::Audio(audio) => Data::Audio(audio),
-            proto::message::Data::Video(video) => Data::Video(video),
-            proto::message::Data::Document(document) => Data::Document(document),
-            proto::message::Data::Image(image) => Data::Image(image),
-            proto::message::Data::File(file) => Data::File(file),
-            proto::message::Data::Url(url) => Data::Url(url),
+            types::message::Data::Text(text) => Data::Text(text),
+            types::message::Data::Audio(audio) => Data::Audio(audio),
+            types::message::Data::Video(video) => Data::Video(video),
+            types::message::Data::Document(document) => Data::Document(document),
+            types::message::Data::Image(image) => Data::Image(image),
+            types::message::Data::File(file) => Data::File(file),
+            types::message::Data::Url(url) => Data::Url(url),
         }
     }
 }
 
-impl Into<MessageEvent> for proto::MessageEvent {
+impl Into<MessageEvent> for types::MessageEvent {
     fn into(self) -> MessageEvent {
         MessageEvent {
             command: self.command.into(),

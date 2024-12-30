@@ -1,5 +1,11 @@
 FROM clux/muslrust:nightly AS chef
+
+LABEL MAINTAINER="mattjon480"
+LABEL NAME="rust-server"
+LABEL VERSION="0.1"
+
 USER root
+
 RUN cargo install cargo-chef
 WORKDIR /app
 
@@ -9,9 +15,10 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
+
 RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --target x86_64-unknown-linux-musl --bin server
+RUN cargo build --release --target x86_64-unknown-linux-musl --bin server --package server
 
 
 FROM gcr.io/distroless/static-debian12:latest-amd64 AS runtime

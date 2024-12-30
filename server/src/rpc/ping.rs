@@ -1,10 +1,10 @@
-use crate::rpc::proto::ping_server::Ping;
-use crate::rpc::proto::{PingMsg, Pong};
 use std::pin::Pin;
 use tokio::sync::mpsc;
 use tonic::codegen::tokio_stream::wrappers::ReceiverStream;
 use tonic::codegen::tokio_stream::{Stream, StreamExt};
 use tonic::{async_trait, Request, Response, Status, Streaming};
+use crate::proto::types::ping_server::Ping;
+use crate::proto::types::{PingMsg, Pong};
 
 #[derive(Default)]
 pub struct PingPongImpl;

@@ -1,0 +1,36 @@
+# Ignore Rust build artifacts
+target/
+
+# Ignore Git metadata
+.git/
+.gitignore
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+
+# Ignore Rust cache
+.cargo/
+
+# Ignore Node.js modules (if applicable)
+node_modules/
+
+# Ignore unnecessary log files and temporary files
+*.log
+*.out
+*.d
+*.gcda
+*.gcno
+*.so
+*.a
+*.o
+*.dSYM
+*.exe
+*.dll
+*.pdb
+
+# Ignore documentation files
+*.md
