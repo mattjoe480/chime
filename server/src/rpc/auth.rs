@@ -1,21 +1,17 @@
 use std::ops::Add;
 use std::sync::Arc;
-use std::thread;
 use std::time::SystemTime;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use tonic::{async_trait, Request, Response, Status};
 use chrono::{Duration, Utc};
-use futures::executor::block_on;
 use jsonwebtoken::{encode, EncodingKey, Header};
-use mongodb::bson::DateTime;
 use tracing::info;
 use crate::model::credentials;
-use crate::model::user::User;
-use crate::proto::types;
-use crate::rpc::proto;
-use crate::proto::types::auth_server::Auth;
-use crate::proto::types::{AuthToken, Credentials, RefreshToken, Revoke, Token};
+use crate::db::users::User;
+use crate::types;
+use crate::types::auth_server::Auth;
+use crate::types::{AuthToken, Credentials, RefreshToken, Revoke, Token};
 
 lazy_static!{
     static ref jwt_secret_key: Arc<String> = Arc::new(std::env::var("JWT_KEY")
@@ -83,7 +79,7 @@ impl RefreshTokenClaims {
 impl Auth for AuthServerImpl {
     async fn auth(&self, request: Request<Credentials>) -> Result<Response<Token>, Status> {
         let cred = request.into_inner();
-        if let Ok(user) = User::find_by_email(&cred.email).await{
+        if let Some(user) = User::find_by_email(&cred.email).await{
             if !user.verify_password(&cred.password).await { 
                 return Self::error(types::Status::InvalidCredentials, "InvalidCredentials Username/Password");
             }
@@ -91,10 +87,10 @@ impl Auth for AuthServerImpl {
                 .expect("Invalid access token ttl");
             let rtll = refresh_token_ttl.parse()
                 .expect("Invalid refresh token ttl");
-            let access_claim = AccessTokenClaims::new(&user.uid);
-            let refresh_claim = RefreshTokenClaims::new(&user.uid, &cred.client_id);
+            let access_claim = AccessTokenClaims::new(&user.id.to_string());
+            let refresh_claim = RefreshTokenClaims::new(&user.id.to_string(), &cred.client_id);
             let(access_token, refresh_token) = (access_claim.token(), refresh_claim.token());
-            let fut =self.store_all(user.uid.clone(), access_token.clone(), refresh_token.clone(), attl, rtll);
+            let fut =self.store_all(user.id.to_string(), access_token.clone(), refresh_token.clone(), attl, rtll);
             let current_time = SystemTime::now();
             let access_token_expiration = prost_types::Timestamp::from(current_time.add(
                 std::time::Duration::from_hours(attl)
@@ -103,7 +99,7 @@ impl Auth for AuthServerImpl {
                 std::time::Duration::from_hours(rtll)));
             fut.await;
             Ok(Response::new(Token{
-                uid: user.uid,
+                uid: user.id.to_string(),
                 email: user.email, 
                 access_token,
                 refresh_token,

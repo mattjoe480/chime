@@ -1,22 +1,22 @@
-use std::{env, thread};
-use std::sync::Arc;
+use crate::model::credentials::Token;
+use crate::rpc::auth::AuthServerImpl;
+use crate::rpc::events::{ChatServerImpl, ClientManager};
+use crate::rpc::ping::PingPongImpl;
+use crate::types::auth_server::AuthServer;
+use crate::types::chat_server::ChatServer;
+use crate::types::ping_server::PingServer;
 use futures::executor::block_on;
 use futures::future::BoxFuture;
 use futures::FutureExt;
 use lazy_static::lazy_static;
 use log::info;
 use prometheus::{register_counter, register_histogram_vec, Counter, HistogramVec};
-use tonic::{Request, Status};
+use std::sync::Arc;
+use std::{env, thread};
 use tonic::transport::Server;
+use tonic::{Request, Status};
 use tonic_reflection::server::Builder;
 use tracing::debug;
-use crate::model::credentials::Token;
-use crate::proto::types::auth_server::AuthServer;
-use crate::proto::types::chat_server::ChatServer;
-use crate::proto::types::ping_server::PingServer;
-use crate::rpc::auth::AuthServerImpl;
-use crate::rpc::events::{ChatServerImpl, ClientManager};
-use crate::rpc::ping::PingPongImpl;
 pub mod ping;
 pub mod message;
 pub mod events;
@@ -36,9 +36,8 @@ lazy_static! {
     ).unwrap();
 }
 pub mod proto{
-    use crate::proto::types::*;
     pub (crate) const FILE_DESCRIPTOR_SET: &[u8] =
-        tonic::include_file_descriptor_set!("server_descriptor");
+        include_bytes!("../../proto/reflection/server_descriptor.bin");
 }
 
 fn is_valid_token(token: &str) -> BoxFuture<bool> {
@@ -87,14 +86,15 @@ impl Grpc {
                 let reflection = Builder::configure()
                     .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
                     .build_v1alpha().unwrap();
-        
-            Server::builder()
+                let grpc_url = env::var("GRPC_URL").expect("GRPC_URL env var not set");
+                debug!("Starting Grpc server at {}", grpc_url);
+                Server::builder()
                 .max_concurrent_streams(1024)
-                .add_service(message_server)
-                .add_service(reflection)
-                .add_service(ping_server)
-                .add_service(auth_server)
-                .serve(env::var("GRPC_URL").unwrap().as_str().parse().unwrap())
+                    .add_service(message_server)
+                    .add_service(reflection)
+                    .add_service(ping_server)
+                    .add_service(auth_server)
+                    .serve(grpc_url.parse().unwrap())
                 .await.expect("Cannot create server");
             });
         });

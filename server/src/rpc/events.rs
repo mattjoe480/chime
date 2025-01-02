@@ -11,9 +11,9 @@ use tokio_stream::{Stream, StreamExt};
 use tonic::{Request, Response, Status, Streaming};
 use tracing::{info, warn};
 use crate::model::credentials::Token;
-use crate::proto::types::chat_server::Chat;
-use crate::proto::types::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
-use crate::proto::types::events::events::Event;
+use crate::types::chat_server::Chat;
+use crate::types::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
+use crate::types::events::events::Event;
 use crate::rpc::{CLIENT_MANAGER, EVENT_REQUESTS_TOTAL, EVENT_REQUEST_DURATION};
 use crate::rpc::message::MessageEventService;
 

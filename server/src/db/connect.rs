@@ -1,7 +1,9 @@
+use charybdis::scylla::CachingSession;
 use mongodb::Client;
 use mongodb::options::{ClientOptions, ServerApi, ServerApiVersion};
 use tracing::{error, info};
 use crate::controllers::initialize::get_mongodb_uri;
+
 
 #[derive(Clone)]
 pub struct DatabaseCon{
@@ -27,4 +29,5 @@ impl DatabaseCon{
 
         }
     }
+    
 }

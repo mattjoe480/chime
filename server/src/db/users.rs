@@ -1,0 +1,152 @@
+use sea_orm::QueryFilter;
+use crate::controllers::initialize::get_postgres_conn;
+use crate::entity::sea_orm_active_enums::Role;
+use crate::entity::users::ActiveModel as UserActiveModel;
+use crate::entity::users::Model as UserModel;
+use crate::entity::users::Entity as UserEntity;
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
+use argon2::{password_hash, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use charybdis::types::Uuid;
+use chrono::{DateTime, FixedOffset, Utc};
+use log::error;
+use sea_orm::prelude::DateTimeWithTimeZone;
+use sea_orm::ActiveValue::Set;
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait};
+use tokio::time::Instant;
+use tracing::debug;
+
+pub struct User{
+    pub id: uuid::Uuid,
+    pub name: String,
+    pub email: String,
+    password: Option<String>,
+    pub provider: String,
+    pub provider_uid: Option<String>,
+    pub register_date: Option<DateTimeWithTimeZone>,
+    pub role: Role,
+}
+
+impl User {
+    pub async fn new(name: String, email:String, password:Option<String>, provider: String, provider_uid: Option<String>) -> Self {
+        let mut hashed_password: Option<String> = Some(String::new());
+        if let Some(password) = password {
+            hashed_password = Some(Self::hash_password(password).await
+                .expect("Cannot hash the password"));
+        }
+        User {
+            id: Uuid::new_v4(),
+            name,
+            email,
+            password: hashed_password,
+            provider,
+            provider_uid,
+            register_date: None,
+            role: Role::User,
+        }
+    }
+    pub async fn insert_new_user(self) -> Result<(), String> {
+        let db = get_postgres_conn();
+        let user =  UserActiveModel{
+            id: Set(self.id),
+            name: Set(self.name),
+            email: Set(self.email),
+            password: Set(self.password),
+            provider: Set(self.provider),
+            provideruid: Set(self.provider_uid),
+            registerdate: Set(Some(DateTime::from(Utc::now()))),
+            role: Set(self.role),
+        };
+        if let Err(e) = user.insert(&db.await).await{
+            return Err(format!("Cannot insert user: {}", e))
+        }
+        Ok(())
+    }
+
+    pub async fn find_by_email(email:&String) -> Option<Self>{
+        let time = Instant::now();
+        let conn = get_postgres_conn();
+        let user_db = UserEntity::find()
+            .filter(crate::entity::users::Column::Email.contains(email))
+            .all(&conn.await).
+            await;
+        if let Ok(user_db) = user_db{ 
+            if user_db.is_empty() {
+                debug!("Time to fetch user {}", time.elapsed().as_millis());
+                return None;
+            }
+            debug!("Time to fetch user {}", time.elapsed().as_millis());
+            return Some(user_db.get(0).unwrap().to_owned().into());
+        }
+        debug!("Failed to fetch user in {}", time.elapsed().as_millis());
+        None
+    }
+    async fn hash_password(password: String) -> Result<String, password_hash::Error>{
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        match argon2.hash_password(password.as_bytes(), &salt){
+            Ok(hashed_password) => { Ok(hashed_password.to_string()) }
+            Err(e) => Err(e)
+        }
+    }
+    pub async fn verify_password(&self, password: &str) -> bool{
+        if let Some(password_db) = self.password.clone() {
+            return match PasswordHash::new(&password_db){
+                Ok(hashed_password) => {
+                    Argon2::default().verify_password(password.as_bytes(), &hashed_password).is_ok()
+                }
+                Err(e) => {
+                    error!("Cannot verify password: {}", e);
+                    false
+                }
+            }
+        }
+        false
+    } 
+    
+}
+
+impl Into<User> for UserActiveModel {
+    fn into(self) -> User {
+        User{
+            id: self.id.unwrap(),
+            name: self.name.unwrap(),
+            email: self.email.unwrap(),
+            password: self.password.unwrap(),
+            provider: self.provider.unwrap(),
+            provider_uid: self.provideruid.unwrap(),
+            register_date: self.registerdate.unwrap(),
+            role: self.role.unwrap()
+        }
+    }
+}
+
+impl Into<User> for UserModel {
+    fn into(self) -> User {
+        User{
+            id: self.id,
+            name: self.name,
+            email: self.email,
+            password: self.password,
+            provider: self.provider,
+            provider_uid: self.provideruid,
+            register_date: self.registerdate,
+            role: self.role
+        }
+    }
+}
+
+impl Into<UserActiveModel> for User{
+    fn into(self) -> UserActiveModel {
+        UserActiveModel{
+            id: Set(self.id),
+            name: Set(self.name),
+            email: Set(self.email),
+            password: Set(self.password),
+            provider: Set(self.provider),
+            provideruid: Set(self.provider_uid),
+            registerdate: Set(self.register_date),
+            role: Set(self.role),
+        } 
+    }
+}

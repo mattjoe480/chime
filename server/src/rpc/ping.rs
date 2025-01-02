@@ -3,8 +3,8 @@ use tokio::sync::mpsc;
 use tonic::codegen::tokio_stream::wrappers::ReceiverStream;
 use tonic::codegen::tokio_stream::{Stream, StreamExt};
 use tonic::{async_trait, Request, Response, Status, Streaming};
-use crate::proto::types::ping_server::Ping;
-use crate::proto::types::{PingMsg, Pong};
+use crate::types::ping_server::Ping;
+use crate::types::{PingMsg, Pong};
 
 #[derive(Default)]
 pub struct PingPongImpl;
@@ -13,18 +13,12 @@ pub struct PingPongImpl;
 impl Ping for PingPongImpl {
     async fn ping(&self, request: Request<PingMsg>) -> Result<Response<Pong>, Status> {
         println!("Received a ping: {:?}", request);
-
-        // let pong = Pong {
-        //     message: format!("Pong: {}", request.into_inner().message),
-        // };
         let pong = Pong {
             message: "Pong".to_string(),
         };
-
         Ok(Response::new(pong))
-
     }
-
+    
     type PingStreamStream = Pin<Box<dyn Stream<Item = Result<Pong, Status>> + Send>>;
 
     async fn ping_stream(&self, request: Request<Streaming<PingMsg>>) -> Result<Response<Self::PingStreamStream>, Status> {

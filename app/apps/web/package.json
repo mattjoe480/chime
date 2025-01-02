@@ -8,7 +8,7 @@
     "export": "next build && next export",
     "start": "next start",
     "lint": "next lint",
-    "proto": "cd ../../../server/src/proto && protoc --ts_out=../../../app/apps/web/src/proto *.proto"
+    "proto": "cd ../../../server/proto && protoc --ts_out=../../../app/apps/web/src/proto *.proto"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.12.5",

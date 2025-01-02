@@ -1,4 +1,4 @@
-use crate::proto::types;
+use crate::types;
 use prost_types::Timestamp as ProtoTimestamp;
 use serde::{Deserialize, Serialize};
 use std::fmt;
