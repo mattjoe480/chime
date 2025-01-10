@@ -3,7 +3,7 @@
  * compiler version: 5.28.3
  * source: auth.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
-import * as dependency_1 from "@/proto/google/protobuf/timestamp";
+import * as dependency_1 from "./google/protobuf/timestamp";
 import * as pb_1 from "google-protobuf";
 import * as grpc_1 from "@grpc/grpc-js";
 export namespace auth {
@@ -816,6 +816,232 @@ export namespace auth {
             return Login.deserialize(bytes);
         }
     }
+    export class User extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            name?: string;
+            email?: string;
+            password?: string;
+            provider?: string;
+            provider_uid?: string;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("name" in data && data.name != undefined) {
+                    this.name = data.name;
+                }
+                if ("email" in data && data.email != undefined) {
+                    this.email = data.email;
+                }
+                if ("password" in data && data.password != undefined) {
+                    this.password = data.password;
+                }
+                if ("provider" in data && data.provider != undefined) {
+                    this.provider = data.provider;
+                }
+                if ("provider_uid" in data && data.provider_uid != undefined) {
+                    this.provider_uid = data.provider_uid;
+                }
+            }
+        }
+        get name() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set name(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get email() {
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+        }
+        set email(value: string) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        get password() {
+            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+        }
+        set password(value: string) {
+            pb_1.Message.setField(this, 3, value);
+        }
+        get provider() {
+            return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+        }
+        set provider(value: string) {
+            pb_1.Message.setField(this, 4, value);
+        }
+        get provider_uid() {
+            return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+        }
+        set provider_uid(value: string) {
+            pb_1.Message.setField(this, 5, value);
+        }
+        static fromObject(data: {
+            name?: string;
+            email?: string;
+            password?: string;
+            provider?: string;
+            provider_uid?: string;
+        }): User {
+            const message = new User({});
+            if (data.name != null) {
+                message.name = data.name;
+            }
+            if (data.email != null) {
+                message.email = data.email;
+            }
+            if (data.password != null) {
+                message.password = data.password;
+            }
+            if (data.provider != null) {
+                message.provider = data.provider;
+            }
+            if (data.provider_uid != null) {
+                message.provider_uid = data.provider_uid;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                name?: string;
+                email?: string;
+                password?: string;
+                provider?: string;
+                provider_uid?: string;
+            } = {};
+            if (this.name != null) {
+                data.name = this.name;
+            }
+            if (this.email != null) {
+                data.email = this.email;
+            }
+            if (this.password != null) {
+                data.password = this.password;
+            }
+            if (this.provider != null) {
+                data.provider = this.provider;
+            }
+            if (this.provider_uid != null) {
+                data.provider_uid = this.provider_uid;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.name.length)
+                writer.writeString(1, this.name);
+            if (this.email.length)
+                writer.writeString(2, this.email);
+            if (this.password.length)
+                writer.writeString(3, this.password);
+            if (this.provider.length)
+                writer.writeString(4, this.provider);
+            if (this.provider_uid.length)
+                writer.writeString(5, this.provider_uid);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): User {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new User();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.name = reader.readString();
+                        break;
+                    case 2:
+                        message.email = reader.readString();
+                        break;
+                    case 3:
+                        message.password = reader.readString();
+                        break;
+                    case 4:
+                        message.provider = reader.readString();
+                        break;
+                    case 5:
+                        message.provider_uid = reader.readString();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): User {
+            return User.deserialize(bytes);
+        }
+    }
+    export class RegisterStatus extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            status?: Status;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("status" in data && data.status != undefined) {
+                    this.status = data.status;
+                }
+            }
+        }
+        get status() {
+            return pb_1.Message.getFieldWithDefault(this, 1, Status.AUTH_SUCCESS) as Status;
+        }
+        set status(value: Status) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            status?: Status;
+        }): RegisterStatus {
+            const message = new RegisterStatus({});
+            if (data.status != null) {
+                message.status = data.status;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                status?: Status;
+            } = {};
+            if (this.status != null) {
+                data.status = this.status;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.status != Status.AUTH_SUCCESS)
+                writer.writeEnum(1, this.status);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): RegisterStatus {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new RegisterStatus();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.status = reader.readEnum();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): RegisterStatus {
+            return RegisterStatus.deserialize(bytes);
+        }
+    }
     interface GrpcUnaryServiceInterface<P, R> {
         (message: P, metadata: grpc_1.Metadata, options: grpc_1.CallOptions, callback: grpc_1.requestCallback<R>): grpc_1.ClientUnaryCall;
         (message: P, metadata: grpc_1.Metadata, callback: grpc_1.requestCallback<R>): grpc_1.ClientUnaryCall;
@@ -868,12 +1094,22 @@ export namespace auth {
                 requestDeserialize: (bytes: Buffer) => RefreshToken.deserialize(new Uint8Array(bytes)),
                 responseSerialize: (message: Revoke) => Buffer.from(message.serialize()),
                 responseDeserialize: (bytes: Buffer) => Revoke.deserialize(new Uint8Array(bytes))
+            },
+            register: {
+                path: "/auth.auth/register",
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (message: User) => Buffer.from(message.serialize()),
+                requestDeserialize: (bytes: Buffer) => User.deserialize(new Uint8Array(bytes)),
+                responseSerialize: (message: RegisterStatus) => Buffer.from(message.serialize()),
+                responseDeserialize: (bytes: Buffer) => RegisterStatus.deserialize(new Uint8Array(bytes))
             }
         };
         [method: string]: grpc_1.UntypedHandleCall;
         abstract auth(call: grpc_1.ServerUnaryCall<Credentials, Token>, callback: grpc_1.sendUnaryData<Token>): void;
         abstract token(call: grpc_1.ServerUnaryCall<RefreshToken, AuthToken>, callback: grpc_1.sendUnaryData<AuthToken>): void;
         abstract revoke(call: grpc_1.ServerUnaryCall<RefreshToken, Revoke>, callback: grpc_1.sendUnaryData<Revoke>): void;
+        abstract register(call: grpc_1.ServerUnaryCall<User, RegisterStatus>, callback: grpc_1.sendUnaryData<RegisterStatus>): void;
     }
     export class authClient extends grpc_1.makeGenericClientConstructor(UnimplementedauthService.definition, "auth", {}) {
         constructor(address: string, credentials: grpc_1.ChannelCredentials, options?: Partial<grpc_1.ChannelOptions>) {
@@ -887,6 +1123,9 @@ export namespace auth {
         };
         revoke: GrpcUnaryServiceInterface<RefreshToken, Revoke> = (message: RefreshToken, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<Revoke>, options?: grpc_1.CallOptions | grpc_1.requestCallback<Revoke>, callback?: grpc_1.requestCallback<Revoke>): grpc_1.ClientUnaryCall => {
             return super.revoke(message, metadata, options, callback);
+        };
+        register: GrpcUnaryServiceInterface<User, RegisterStatus> = (message: User, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<RegisterStatus>, options?: grpc_1.CallOptions | grpc_1.requestCallback<RegisterStatus>, callback?: grpc_1.requestCallback<RegisterStatus>): grpc_1.ClientUnaryCall => {
+            return super.register(message, metadata, options, callback);
         };
     }
 }

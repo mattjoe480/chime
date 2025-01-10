@@ -1,6 +1,5 @@
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Instant;

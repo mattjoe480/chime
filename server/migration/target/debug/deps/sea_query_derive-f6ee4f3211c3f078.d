@@ -1,0 +1,10 @@
+X:\code\rust\chime\server\migration\target\debug\deps\sea_query_derive-f6ee4f3211c3f078.dll: C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\lib.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\mod.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\attr.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\error.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\path.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\write_arm.rs
+
+X:\code\rust\chime\server\migration\target\debug\deps\sea_query_derive-f6ee4f3211c3f078.d: C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\lib.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\mod.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\attr.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\error.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\path.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\write_arm.rs
+
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\lib.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\mod.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\attr.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\error.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\path.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sea-query-derive-0.4.2\src\iden\write_arm.rs:

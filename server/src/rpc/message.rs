@@ -2,11 +2,9 @@ use tokio::sync::mpsc::Sender;
 use tonic::{Code, Status};
 use tracing::info;
 use crate::db::pending_message::PendingMessage;
-use crate::model::events;
 use crate::types::events::events::Event;
 use crate::types::{Events, MessageCommand, MessageEvent};
 use crate::rpc::events::ClientManager;
-use crate::rpc::proto;
 
 impl MessageEvent{
     pub async fn on_new_message(&self) -> Result<Event, Status>{ 

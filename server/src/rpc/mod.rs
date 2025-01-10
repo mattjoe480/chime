@@ -1,3 +1,8 @@
+pub mod ping;
+pub mod message;
+pub mod events;
+pub mod auth;
+
 use crate::model::credentials::Token;
 use crate::rpc::auth::AuthServerImpl;
 use crate::rpc::events::{ChatServerImpl, ClientManager};
@@ -17,10 +22,7 @@ use tonic::transport::Server;
 use tonic::{Request, Status};
 use tonic_reflection::server::Builder;
 use tracing::debug;
-pub mod ping;
-pub mod message;
-pub mod events;
-pub mod auth;
+
 
 lazy_static! {
     static ref CLIENT_MANAGER: Arc<ClientManager> = Arc::new(ClientManager::new());

@@ -3,12 +3,10 @@ import { FloatingDock } from "@/components/ui/floating-dock";
 import {
     IconBrandGithub,
     IconBrandX,
-    IconExchange,
     IconHome,
     IconNewSection,
     IconTerminal2,
 } from "@tabler/icons-react";
-import Image from "next/image";
 
 export function Dock() {
     const links = [
@@ -52,7 +50,6 @@ export function Dock() {
     return (
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
             <FloatingDock
-                mobileClassName="translate-y-20" // only for demo, remove for production
                 items={links}
             />
         </div>

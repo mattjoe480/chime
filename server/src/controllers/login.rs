@@ -18,7 +18,7 @@ pub struct LoginData {
 pub async fn login_controller(login_data: Json<LoginData>) -> impl Responder {
     info!("login controller");
     let time = Instant::now();
-    if let Some(user) = User::find_by_email(&login_data.email).await{
+    match User::find_by_email(&login_data.email).await{ Some(user) => {
         match user.verify_password(&login_data.password).await { 
             true => {
                 info!("User with email id {} logged in successfully", &user.email);
@@ -52,10 +52,10 @@ pub async fn login_controller(login_data: Json<LoginData>) -> impl Responder {
                 HttpResponse::Unauthorized().finish()
             }
         }
-    }else {
+    } _ => {
         info!("Time to err {}", time.elapsed().as_millis());
         info!("User with email id {} not found failed to login", login_data.email.clone());
         HttpResponse::Unauthorized().finish()
-    }
+    }}
     
 }

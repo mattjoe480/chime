@@ -8,23 +8,23 @@ enum Status {
   AUTH_SUCCESS = 0;
   AUTH_FAILED = 1;
   INVALID_CREDENTIALS = 2;
-  EXPIRED_TOKEN = 3;          // Token has expired and needs to be refreshed
-  ACCOUNT_LOCKED = 4;         // Account is locked due to multiple failed login attempts
-  USER_NOT_FOUND = 5;         // User does not exist
-  INVALID_PASSWORD = 6;       // The password provided is incorrect
+  EXPIRED_TOKEN = 3;          
+  ACCOUNT_LOCKED = 4;         
+  USER_NOT_FOUND = 5;         
+  INVALID_PASSWORD = 6;       
 }
 
 message Token {
-  string uid = 1;                        // User's unique identifier
-  string email = 2;                      // User's email address
-  string access_token = 3;               // Access token for authentication
-  string refresh_token = 4;              // Refresh token to obtain a new access token
-  Status status = 5;                     // Authentication status
-  string error_message = 6;              // Optional field for detailed error message
-  google.protobuf.Timestamp access_token_expiration = 7;  // Expiration timestamp of access token
-  google.protobuf.Timestamp refresh_token_expiration = 8; // Expiration timestamp of refresh token
-  bool mfa_required = 9;                // Whether MFA is required (optional)
-  google.protobuf.Timestamp last_login = 10;  // Timestamp of last successful login
+  string uid = 1;
+  string email = 2;                      
+  string access_token = 3;               
+  string refresh_token = 4;              
+  Status status = 5;                     
+  string error_message = 6;              
+  google.protobuf.Timestamp access_token_expiration = 7;  
+  google.protobuf.Timestamp refresh_token_expiration = 8; 
+  bool mfa_required = 9;                
+  google.protobuf.Timestamp last_login = 10;  
 }
 
 message Credentials{
@@ -53,8 +53,22 @@ message Login{
   bool canLogin = 1;
 }
 
+
+message User{
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  string provider = 4;
+  string provider_uid = 5;
+}
+
+message RegisterStatus{
+  Status status = 1;
+}
+
 service auth{
   rpc auth(Credentials) returns (Token);
   rpc token(RefreshToken) returns(AuthToken);
   rpc revoke(RefreshToken) returns(Revoke);
+  rpc register(User) returns(RegisterStatus);
 }

@@ -5,6 +5,7 @@ import {ThemeProvider} from "@/components/theme-provider";
 import Image from "next/image";
 import Logo from './icons/brand.svg';
 import {ReactNode} from "react";
+import {SessionProvider} from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,16 +29,18 @@ export default function RootLayout({children,}: Readonly<{ children: ReactNode;
     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
     <ThemeProvider
         attribute="class"
-        defaultTheme="dark"
+        defaultTheme="light"
         enableSystem
         disableTransitionOnChange>
         <Image
         priority
         src={Logo}
         alt="Follow us on Twitter"
-        className="fixed z-50 top-0 left-0 sm:w-[100px] md:w-[150px] -py-3.5"
+        className="fixed z-50 top-0 left-0 sm:w-[100px] md:w-[150px] -py-3.5 hidden md:block lg:block"
     />
-        {children}
+        <SessionProvider>
+            {children}
+        </SessionProvider>
     </ThemeProvider>
     </body>
     </html>

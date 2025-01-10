@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "export": "next build && next export",
     "start": "next start",
     "lint": "next lint",
-    "proto": "cd ../../../server/proto && protoc --ts_out=../../../app/apps/web/src/proto *.proto"
+    "proto": "cd ../../../server/proto && protoc --ts_out=../../app/apps/web/src/proto *.proto"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.12.5",
@@ -22,13 +22,14 @@
     "i": "^0.3.7",
     "lucide-react": "^0.469.0",
     "mini-svg-data-uri": "^1.4.4",
-    "next": "15.1.2",
-    "next-auth": "^4.24.11",
+    "next": "15.1.3",
+    "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.4.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -44,5 +45,6 @@
     "typescript": "^5"
   },
   "module": "index.ts",
-  "type": "module"
+  "type": "module",
+  "packageManager": "pnpm@9.15.2"
 }

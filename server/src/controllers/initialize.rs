@@ -9,11 +9,9 @@ use redis::{Client, Connection};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use tokio::sync::{Mutex, MutexGuard};
 use tracing::{debug, error, info};
-use crate::db::{DatabaseCon, Scylla};
+use crate::db::{Scylla};
 
 lazy_static!{
-    static ref mongodb_conn: Arc<Mutex<Option<DatabaseCon>>> = Arc::new(Mutex::new(None));
-    static ref mongodb_uri: String = env::var("MONGODB_URI").unwrap_or("mongodb://localhost:27017".to_string());
     static ref jwt_ttl: String = env::var("JWT_TTL").unwrap_or("60".to_string());
     static ref jwt_secret_key: String = env::var("JWT_KEY").unwrap_or("dev".to_string());
     static ref redis_uri: String = env::var("REDIS_URI").unwrap_or("redis://127.0.0.1/".to_string());
@@ -26,16 +24,6 @@ lazy_static!{
     static ref postgres_conn: Arc<Mutex<Option<DatabaseConnection>>> = Arc::new(Mutex::new(None)); 
 }
 
-pub async fn init_database() {
-    let dbc = DatabaseCon::new().await;
-    let mut lock = mongodb_conn.lock().await;
-    match lock.as_mut() {
-        Some(_db)=>{},
-        None =>{
-            *lock = Some(dbc);
-        },
-    };
-}
 
 pub async fn connect_to_redis() -> Result<Connection, redis::RedisError> {
     let uri = redis_uri.clone();
@@ -64,25 +52,11 @@ pub async fn init_redis(){
     
 }
 
-pub async fn get_mongodb_conn() -> DatabaseCon {
-    let mut lock = mongodb_conn.lock().await;
-    match lock.as_mut() {
-        Some(_db) => lock.clone().unwrap(),
-        None =>{
-            *lock = Some(DatabaseCon::new().await);
-            lock.clone().unwrap()
-        }
-    }
-}
-
 pub async fn get_redis_conn() -> MutexGuard<'static, Option<Connection>> {
     let lock = redis_conn.lock().await;
     lock
 }
 
-pub async fn get_mongodb_uri() -> String {
-    mongodb_uri.clone()
-}
 pub async fn get_jwt_ttl() -> String {
     jwt_ttl.clone()
 }
@@ -95,7 +69,6 @@ pub async fn initialize_all(){
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::from_str(env::var("LOG_LEVEL").unwrap().as_str()).unwrap())
         .init();
-    init_database().await;
     init_postgres().await.unwrap();
     init_db().await.unwrap();
     init_redis().await;

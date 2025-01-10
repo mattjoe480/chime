@@ -7,22 +7,31 @@ import { LampContainer } from './ui/lamp';
 
 const words = [
     {
-        text: "Chime",
+        text: "Site",
     },
     {
-        text: "world's",
+        text: "Is",
     },
     {
-        text: "first",
+        text: "Under",
     },
     {
-        text: "ai",
+        text: "Construction",
     },
     {
-        text: "health",
+        text: "Thank",
     },
     {
-        text: "app",
+        text: "You",
+    },
+    {
+        text: "For",
+    },
+    {
+        text: "Your"
+    },
+    {
+        text: "Patience"
     }
     ]
 

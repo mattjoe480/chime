@@ -8,18 +8,32 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{password_hash, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use charybdis::types::Uuid;
-use chrono::{DateTime, FixedOffset, Utc};
+use chrono::{DateTime, Utc};
 use log::error;
 use sea_orm::prelude::DateTimeWithTimeZone;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait};
+use serde::{Deserialize, Serialize};
 use tokio::time::Instant;
 use tracing::debug;
+use validator::{Validate, ValidationError, ValidationErrors};
+use once_cell::sync::Lazy;
+use regex_filtered::{Builder, Regexes};
+static STRONG_PASSWORD: Lazy<Regexes> = Lazy::new(|| {
+    Builder::new()
+        .push(r"^[A-Za-z\d!@#$%^&*()_+={}\[\]:;\'<>,.?/\\|`~\-_]{8,}$").unwrap()
+        .build().unwrap()
 
+});
+
+
+#[derive(Debug, Validate, Deserialize, Serialize)]
 pub struct User{
     pub id: uuid::Uuid,
     pub name: String,
+    #[validate(email, contains(pattern = "gmail", message = "Email must be valid gmail address"))]
     pub email: String,
+    #[validate(custom(function = "validate_password"))]
     password: Option<String>,
     pub provider: String,
     pub provider_uid: Option<String>,
@@ -28,22 +42,29 @@ pub struct User{
 }
 
 impl User {
-    pub async fn new(name: String, email:String, password:Option<String>, provider: String, provider_uid: Option<String>) -> Self {
+    pub async fn new(name: String, email:String, password:Option<String>, provider: String, provider_uid: Option<String>) -> Result<Self, ValidationErrors> {
         let mut hashed_password: Option<String> = Some(String::new());
-        if let Some(password) = password {
+        if let Some(password) = password.clone() {
             hashed_password = Some(Self::hash_password(password).await
                 .expect("Cannot hash the password"));
         }
-        User {
+        let mut user = User {
             id: Uuid::new_v4(),
             name,
             email,
-            password: hashed_password,
+            password,
             provider,
             provider_uid,
             register_date: None,
             role: Role::User,
+        };
+        let validate = user.validate();
+        if validate.is_err() {
+            return Err(validate.err().unwrap())
         }
+        user.password  = hashed_password;
+        Ok(user)
+
     }
     pub async fn insert_new_user(self) -> Result<(), String> {
         let db = get_postgres_conn();
@@ -70,13 +91,32 @@ impl User {
             .filter(crate::entity::users::Column::Email.contains(email))
             .all(&conn.await).
             await;
-        if let Ok(user_db) = user_db{ 
+        if let Ok(user_db) = user_db{
             if user_db.is_empty() {
                 debug!("Time to fetch user {}", time.elapsed().as_millis());
                 return None;
             }
             debug!("Time to fetch user {}", time.elapsed().as_millis());
-            return Some(user_db.get(0).unwrap().to_owned().into());
+            return Some(user_db.first().unwrap().to_owned().into());
+        }
+        debug!("Failed to fetch user in {}", time.elapsed().as_millis());
+        None
+    }
+    
+    pub async fn find_by_id(uid: &String) -> Option<Self>{
+        let time = Instant::now();
+        let conn = get_postgres_conn();
+        let user_db = UserEntity::find()
+            .filter(crate::entity::users::Column::Id.eq(uid))
+            .all(&conn.await).
+            await;
+        if let Ok(user_db) = user_db{
+            if user_db.is_empty() {
+                debug!("Time to fetch user {}", time.elapsed().as_millis());
+                return None;
+            }
+            debug!("Time to fetch user {}", time.elapsed().as_millis());
+            return Some(user_db.first().unwrap().to_owned().into());
         }
         debug!("Failed to fetch user in {}", time.elapsed().as_millis());
         None
@@ -102,8 +142,8 @@ impl User {
             }
         }
         false
-    } 
-    
+    }
+
 }
 
 impl Into<User> for UserActiveModel {
@@ -147,6 +187,13 @@ impl Into<UserActiveModel> for User{
             provideruid: Set(self.provider_uid),
             registerdate: Set(self.register_date),
             role: Set(self.role),
-        } 
+        }
     }
+}
+
+fn validate_password(value: &&String) -> Result<(), ValidationError> {
+    if STRONG_PASSWORD.is_match(value){
+        return Ok(());
+    }
+    Err(ValidationError::new("Password not allowed"))
 }

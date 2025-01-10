@@ -17,7 +17,6 @@ export async function getMethods(service: string): Promise<Array<ListMethodsType
 
 export async function getService<T>(service: string){
     let name = service.split(".");
-    console.log(name[0] + ".proto", " service "+ service);
     return serviceHelper<T>({
         host: url,
         credentials: grpc.credentials.createInsecure(),

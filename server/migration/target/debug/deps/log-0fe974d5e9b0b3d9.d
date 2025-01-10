@@ -1,0 +1,13 @@
+X:\code\rust\chime\server\migration\target\debug\deps\liblog-0fe974d5e9b0b3d9.rmeta: C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\lib.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\macros.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\serde.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\mod.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\error.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\key.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\source.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\value.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\__private_api.rs
+
+X:\code\rust\chime\server\migration\target\debug\deps\log-0fe974d5e9b0b3d9.d: C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\lib.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\macros.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\serde.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\mod.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\error.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\key.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\source.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\value.rs C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\__private_api.rs
+
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\lib.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\macros.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\serde.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\mod.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\error.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\key.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\source.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\kv\value.rs:
+C:\Users\invin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\log-0.4.22\src\__private_api.rs:

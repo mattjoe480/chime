@@ -6,12 +6,13 @@ use serde::{Deserialize, Serialize};
 use tonic::{async_trait, Request, Response, Status};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use tracing::info;
+use tracing::{debug, info};
+use crate::db::users;
 use crate::model::credentials;
 use crate::db::users::User;
 use crate::types;
 use crate::types::auth_server::Auth;
-use crate::types::{AuthToken, Credentials, RefreshToken, Revoke, Token};
+use crate::types::{auth, AuthToken, Credentials, RefreshToken, RegisterStatus, Revoke, Token};
 
 lazy_static!{
     static ref jwt_secret_key: Arc<String> = Arc::new(std::env::var("JWT_KEY")
@@ -79,7 +80,7 @@ impl RefreshTokenClaims {
 impl Auth for AuthServerImpl {
     async fn auth(&self, request: Request<Credentials>) -> Result<Response<Token>, Status> {
         let cred = request.into_inner();
-        if let Some(user) = User::find_by_email(&cred.email).await{
+        match User::find_by_email(&cred.email).await{ Some(user) => {
             if !user.verify_password(&cred.password).await { 
                 return Self::error(types::Status::InvalidCredentials, "InvalidCredentials Username/Password");
             }
@@ -110,10 +111,9 @@ impl Auth for AuthServerImpl {
                 mfa_required: false,
                 last_login: None,
             }))
-        }
-        else {
+        } _ => {
             Self::error(types::Status::InvalidCredentials, "InvalidCredentials Username/Password")
-        }
+        }}
     }
 
     async fn token(&self, request: Request<RefreshToken>) -> Result<Response<AuthToken>, Status> {
@@ -134,9 +134,42 @@ impl Auth for AuthServerImpl {
             error_message: "Please sign-in once more".to_string(),
         }))
     }
-
     async fn revoke(&self, request: Request<RefreshToken>) -> Result<Response<Revoke>, Status> {
         Err(Status::unimplemented("Not yet implemented"))
+    }
+
+
+    async fn register(&self, request: Request<auth::User>) -> Result<Response<RegisterStatus>, Status> {
+        debug!("Registering new user through gRPC");
+        let data = request.into_inner();
+        let result = User::new(
+            data.name,
+            data.email,
+            Option::from(data.password),
+            data.provider,
+            Option::from(data.provider_uid))
+            .await;
+
+        match result {
+            Ok(user) => {
+                if user.insert_new_user().await.is_ok() {
+                    return Ok(Response::new(RegisterStatus {
+                        status: auth::Status::AuthSuccess.into()
+                    }))
+                }
+                Ok(Response::new(RegisterStatus {
+                    status: auth::Status::InvalidPassword.into()
+                }))
+            },
+            Err(e) => {
+                for (k, v) in e.0.iter() {
+                    debug!("Validation errors: {}",k);
+                }
+                Ok(Response::new(RegisterStatus {
+                    status: auth::Status::InvalidPassword.into()
+                }))
+            }
+        }
     }
 }
 

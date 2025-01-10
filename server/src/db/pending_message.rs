@@ -14,7 +14,7 @@ impl PendingMessage {
         }
         for dst in dst_uids {
             get_redis_conn().await.as_mut().unwrap()
-                .lpush(
+                .lpush::<String, String, String>(
                     format!("pending_messages:{}", dst),
                     str_message.clone()
                 )?;
