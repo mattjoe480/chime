@@ -1,0 +1,8 @@
+services:
+  next-server:
+    container_name: next-server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
