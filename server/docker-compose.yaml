@@ -1,92 +1,89 @@
 services:
-#  rust-server:
-#    container_name: rust-server
-#    network_mode: host
-#    build:
-#      cache_from:
-#        - ghcr.io/mattjoe480/chime/api-server:latest
-#      context: ./
-#      dockerfile: Dockerfile
-#
-#    #image: ghcr.io/mattjoe480/chime/api-server:latest
-#
+  rust-server:
+    container_name: rust-server
+    network_mode: host
+    build:
+      cache_from:
+        - ghcr.io/mattjoe480/chime/api-server:latest
+      context: ./
+      dockerfile: Dockerfile
+
+    #image: ghcr.io/mattjoe480/chime/api-server:latest
+
+    environment:
+      - LOG_LEVEL=DEBUG
+      - GRPC_URL=[::1]:50051
+      - JWT_ACCESS_TOKEN_TTL=1
+      - JWT_KEY=YAWbbw1XsbTkHBtgqDfypjg23IE0DLfoVqH4KB
+      - JWT_REFRESH_KEY=A6nffudKLpEXM5Z4gzrOodMgewYjDqhGSxeMxy
+      - JWT_TOKEN_TOKEN_TTL=720
+      - JWT_TTL=1
+      - REDIS_PASSWORD=vIHdT6wcUpfmI029m9w1KhPCJgQrkDdnP7TvSFmyDOx7bcM6W4W5EXcgjuBQEz0Q
+      - POSTGRES_PASSWORD=75k2K2YODUrkfpYX4nzWcQZRyDdUvK27YK7DivYUpFiudEMNCKUNxwkO8S05ZAcd
+      - POSTGRES_URI=178.16.138.165:5432/postgres
+      - POSTGRES_USER=postgres
+      - REDIS_URI=redis://:vIHdT6wcUpfmI029m9w1KhPCJgQrkDdnP7TvSFmyDOx7bcM6W4W5EXcgjuBQEz0Q@178.16.138.165
+      - SCYLLA_URL=178.16.138.165:9042
+      - SCYLLA_BROADCAST_ADDRESS=178.16.138.165
+      - SCYLLA_CLUSTER_NAME=scyllacluster1
+      - SCYLLA_LISTEN_ADDRESS=178.16.138.165
+      - SCYLLA_SEEDS=178.16.138.165
+      - SERVER_URL=0.0.0.0:8080
+    deploy:
+      update_config:
+        order: start-first
+    restart: on-failure
+
+#  redis:
+#    image: redis:alpine
+#    container_name: redis
+#    restart: unless-stopped
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "ping" ]
+#      interval: 30s
+#      timeout: 10s
+#      start_period: 10s
+#      retries: 4
+#    ports:
+#      - "6379:6379"
+##
+#  scylla:
+#    image: scylladb/scylla:latest
+#    container_name: scylla
+#    hostname: scylla
 #    environment:
-#      - GRPC_URL=${GRPC_URL}
-#      - SERVER_URL=0.0.0.0:8080
-#      - LOG_LEVEL=DEBUG
-#      - MONGODB_URI=mongodb://localhost:27017
-#      - REDIS_URI=redis://127.0.0.1:6379
+#      - SCYLLA_CLUSTER_NAME=${SCYLLA_CLUSTER_NAME}
+#      - SCYLLA_LISTEN_ADDRESS=${SCYLLA_LISTEN_ADDRESS}
+#      - SCYLLA_BROADCAST_ADDRESS=${SCYLLA_BROADCAST_ADDRESS}
+#      - SCYLLA_SEEDS=${SCYLLA_SEEDS}
+#    ports:
+#      - "9042:9042"   # CQL (Cassandra Query Language)
+#      - "7000:7000"   # Internode communication
+#      - "7001:7001"   # Secure internode communication
+#      - "7199:7199"   # JMX (Java Management Extensions)
+#      - "9180:9180"   # Scylla Manager Web UI (optional)
+#    volumes:
+#      - scylla_data:/var/lib/scylla
+#    command: [ "--smp", "1", "--memory", "2G", "--overprovisioned", "1" ]
+#  postgres:
+#    image: postgres
+#    restart: always
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready" ]
+#      interval: 1s
+#      timeout: 5s
+#      retries: 10
 #
 #
-#      - JWT_ACCESS_TOKEN_TTL=1
-#      - JWT_TTL=1
-#      - JWT_TOKEN_TOKEN_TTL=720
-#      - JWT_KEY=testingkey
-#      - JWT_REFRESH_KEY=testingrefreshkey
-#      - POSTGRES_USER=chime
-#      - POSTGRES_PASSWORD=chime
-#      - POSTGRES_URI=localhost:5432/chime
-#      - SCYLLA_CLUSTER_NAME=TestCluster
-#      - SCYLLA_LISTEN_ADDRESS=127.0.0.1
-#      - SCYLLA_BROADCAST_ADDRESS=127.0.0.1
-#      - SCYLLA_SEEDS=127.0.0.1
-#      - MONGO_INITDB_ROOT_USERNAME=admin
-#      - MONGO_INITDB_ROOT_PASSWORD=example
-#    deploy:
-#      update_config:
-#        order: start-first
-#    depends_on:
-#      - redis
-#      - postgres
-#      - scylla
-#    restart: on-failure
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 30s
-      timeout: 10s
-      start_period: 10s
-      retries: 4
-    ports:
-      - "6379:6379"
-
-  scylla:
-    image: scylladb/scylla:latest
-    container_name: scylla
-    hostname: scylla
-    environment:
-      - SCYLLA_CLUSTER_NAME=${SCYLLA_CLUSTER_NAME}
-      - SCYLLA_LISTEN_ADDRESS=${SCYLLA_LISTEN_ADDRESS}
-      - SCYLLA_BROADCAST_ADDRESS=${SCYLLA_BROADCAST_ADDRESS}
-      - SCYLLA_SEEDS=${SCYLLA_SEEDS}
-    ports:
-      - "9042:9042"   # CQL (Cassandra Query Language)
-      - "7000:7000"   # Internode communication
-      - "7001:7001"   # Secure internode communication
-      - "7199:7199"   # JMX (Java Management Extensions)
-      - "9180:9180"   # Scylla Manager Web UI (optional)
-    volumes:
-      - scylla_data:/var/lib/scylla
-    command: [ "--smp", "1", "--memory", "2G", "--overprovisioned", "1" ]
-  postgres:
-    image: postgres
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready" ]
-      interval: 1s
-      timeout: 5s
-      retries: 10
-
-volumes:
-  mongodb_data:
-    driver: local
-  scylla_data:
+#
+#
+#
+#volumes:
+#  mongodb_data:
+#    driver: local
+#  scylla_data:

@@ -19,8 +19,8 @@ lazy_static!{
     static ref scylla_uri: String = env::var("SCYLLA_URL").unwrap_or("127.0.0.1:9042".to_string());
     static ref scylla_session: Arc<Mutex<Option<Scylla>>> = Arc::new(Mutex::new(None));
     static ref postgres_user: String = env::var("POSTGRES_USER").unwrap_or("chime".to_string());
-    static ref postgres_password: String = env::var("POSTGRES_PASSWORD").unwrap_or("chime".to_string());
-    static ref postgres_uri: String = env::var("POSTGRES_URI").unwrap_or("localhost:5432/database?currentSchema=chime".to_string());
+    // static ref postgres_password: String = env::var("POSTGRES_PASSWORD").unwrap_or("chime".to_string());
+    // static ref postgres_uri: String = env::var("POSTGRES_URI").expect("Set POSTGRES_URI");
     static ref postgres_conn: Arc<Mutex<Option<DatabaseConnection>>> = Arc::new(Mutex::new(None)); 
 }
 
@@ -75,7 +75,8 @@ pub async fn initialize_all(){
 }
 
 async fn init_db()->Result<(), ()>{
-    match SessionBuilder::new().known_node(scylla_uri.clone()).build().await {
+    match SessionBuilder::new()
+        .known_node(scylla_uri.clone()).build().await {
         Ok(session) => {
             debug!("Connected to database successfully");
             let mut lock = scylla_session.lock().await;
@@ -97,9 +98,9 @@ pub async fn get_db() -> Arc<Mutex<Option<Scylla>>> {
 
 async fn init_postgres()->Result<(), ()>{
     let conn_uri =format!("postgres://{}:{}@{}",
-                          postgres_user.clone(),
-                          postgres_password.clone(),
-                          postgres_uri.clone());
+                          env::var("POSTGRES_USER").unwrap_or("chime".to_string()),
+                          env::var("POSTGRES_PASSWORD").unwrap_or("chime".to_string()),
+                          env::var("POSTGRES_URI").unwrap_or("178.16.138.165:5432/postgres".to_string()));
     let mut opt = ConnectOptions::new(conn_uri);
     opt.max_connections(100)
         .min_connections(5)
