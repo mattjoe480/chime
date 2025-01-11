@@ -1,4 +1,4 @@
-idname: pipeline
+name: pipeline
 on:
   push:
     branches:
