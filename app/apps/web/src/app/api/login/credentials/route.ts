@@ -1,23 +1,29 @@
-import {NextApiRequest, NextApiResponse} from "next";
+
 import {auth as authGrpc} from "@/proto/auth";
 import {login} from "@/lib/grpc/auth";
 import { NextRequest } from "next/server";
-import {json} from "next/dist/client/components/react-dev-overlay/server/shared";
+import {logger} from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
     console.log("New login req")
     if (req.method === "POST") {
-        const { email, password } = await req.json();
+        const { email, password } = await req.json().catch(
+            (e) => {
+                console.error(e);
+                return Response.json({ error: "Error logging in" });
+            });
         try {
             let loginData = new authGrpc.Credentials();
             loginData.email = email as string;
             loginData.password = password as string;
-            loginData.client_id = "1234";
-            let data=  await login(loginData);
+            console.debug(loginData)
+            let req = new authGrpc.AuthRequest({credentials: loginData});
+            let data=  await login(req);
+            console.debug(data)
             return Response.json(data.toObject());
         }
         catch (e){
-            console.log(e);
+            console.error(e);
             return Response.json({ error: "Error logging in" });
         }
     }

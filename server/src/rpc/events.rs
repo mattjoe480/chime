@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use actix_web::Responder;
+use actix_web::web::to;
 use prometheus::{Encoder, TextEncoder};
 use prometheus::proto::MetricFamily;
 use tokio::sync::mpsc;
@@ -10,7 +11,7 @@ use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::{Stream, StreamExt};
 use tonic::{Request, Response, Status, Streaming};
 use tracing::{info, warn};
-use crate::model::credentials::Token;
+use crate::model::credentials::AccessTokenClaims;
 use crate::types::chat_server::Chat;
 use crate::types::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
 use crate::types::events::events::Event;
@@ -31,7 +32,7 @@ impl Chat for ChatServerImpl {
             .to_str()
             .unwrap();
         let token = bearer.replace("Bearer ", "");
-        let uid = Token::get_cached_uid(&token).await.unwrap();
+        let uid = AccessTokenClaims::from_jwt(token).unwrap().sub;
         let mut in_stream = request.into_inner();
         let (tx, rx) = mpsc::channel(128);
         CLIENT_MANAGER.insert_client(uid.clone(), tx.clone()).await;

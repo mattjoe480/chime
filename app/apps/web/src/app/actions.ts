@@ -1,24 +1,50 @@
 "use server"
-import {display} from "@/lib/grpc/client";
-import {login, register} from "@/lib/grpc/auth";
+import {register} from "@/lib/grpc/auth";
 import {auth} from "@/proto/auth";
-import Credentials = auth.Credentials;
 import User = auth.User;
-import {signIn as SignInHandler} from "@/auth";
+import {signUpSchema} from "@/lib/zod";
+import {SignInResponse} from "@/lib/types";
+import {v4} from "uuid";
+import {validateTurnstileToken} from "next-turnstile";
 
 
-export async function loginGrpc(formData: FormData)
-{
-    await SignInHandler("credentials", formData);
-}
 
-export async function registerGrpc(formData: FormData) {
+
+export async function registerGrpc(formData: FormData) : Promise<SignInResponse> {
+    let token: string | undefined = formData.get("cf-turnstile-response")?.toString();
+    if (token === undefined) {
+        return Promise.resolve({isError: true, fields: undefined, error: ["Capcha failed"]});
+    }
+    const validationResponse = await validateTurnstileToken({
+        token,
+        secretKey: process.env.TURNSTILE_SECRET_KEY!,
+        // Optional: Add an idempotency key to prevent token reuse
+        idempotencyKey: v4(),
+        sandbox: process.env.NODE_ENV === "development",
+    });
+
+    if (!validationResponse.success) {
+        return Promise.resolve({isError: true, fields: undefined, error: ["Capcha failed"]});
+    }
     let user = new User();
-    user.name = formData.get('email')?.toString()!;
+    user.name = formData.get('name')?.toString()!;
     user.email = formData.get('email')?.toString()!;
     user.password =formData.get('password')?.toString()!;
     user.provider = "Local";
-    user.provider_uid = ""
-    let data = await register(user)
-    console.log("Form submitted " + data);
+    user.provider_uid = "";
+    const response = signUpSchema.safeParse({name: user.name, email: user.email, password: user.password});
+    if (response.error){
+        const { errors: err } = response.error;
+        return Promise.resolve( {
+            isError: true,
+            fields: err.map((e) => e.path[0]),
+            error: err.map((e) => e.message)
+        });
+    }
+    let data = await register(user);
+    if (!data) {
+        return Promise.resolve({isError: true, fields: undefined, error: ["Internal server error"]});
+    }
+    return Promise.resolve({isError: false, fields: undefined, error: undefined});
+
 }

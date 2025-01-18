@@ -1,9 +1,0 @@
-services:
-    web:
-        container_name: web
-        network_mode: host
-        build:
-            context: .
-            dockerfile: Dockerfile
-        env_file:
-          - .env.production

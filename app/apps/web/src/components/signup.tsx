@@ -1,30 +1,80 @@
 "use client";
-import React, {Dispatch, SetStateAction} from "react";
+import React, {useState} from "react";
 import {cn} from "@/lib/utils";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {motion} from "framer-motion";
 import {IconBrandGoogle} from "@tabler/icons-react";
 import {signIn} from "next-auth/react"
+import {registerGrpc} from "@/app/actions";
+import {MultiStepLoader} from "@/components/ui/multi-step-loader";
+import {registerLoadingStates} from "@/lib/constants";
+import {SignInResponse} from "@/lib/types";
+import { Turnstile } from "next-turnstile";
 
 interface SignupProps {
     setIsUser?: (value: (((prevState: boolean) => boolean) | boolean)) => void
 }
 
 export default function Signup({setIsUser}: SignupProps) {
+    const [isButtonLoading, setIsButtonLoading] = useState(false);
+    const [nameError, setNameError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [turnstileStatus, setTurnstileStatus] = useState<
+        "success" | "error" | "expired" | "required"
+    >("required");
+    const [error, setError] = useState<string | null>(null);
+
+    async function handleError(signinError: SignInResponse) {
+        if (signinError.fields && signinError.fields.length > 0) {
+            for (let i = 0; i < signinError.fields.length; i++) {
+                switch (signinError.fields[i]) {
+                    case "name":
+                        // @ts-ignore
+                        setNameError(signinError.error[i]);
+                        break;
+                    case "email":
+                        // @ts-ignore
+                        setEmailError(signinError.error[i]);
+                        break;
+                    case "password":
+                        // @ts-ignore
+                        setPasswordError(signinError.error[i]);
+                        break;
+                }
+            }
+        }
+    }
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        // let formData = new FormData(e.currentTarget);
-        // const name = formData.get('name')
-        // const email = formData.get('email')
-        // const password = formData.get('password')
-        // console.log(JSON.stringify({name, email, password}));
-        // await registerGrpc(formData);
+        setNameError("");
+        setEmailError("");
+        setPasswordError("");
+        setIsButtonLoading(true);
+        const formData = new FormData(e.currentTarget);
+        await registerGrpc(formData).then((response) => {
+            if (!response.isError){
+                setTimeout(() => {
+                    setIsButtonLoading(false);
+                    if (setIsUser) setIsUser(true);
+                },2500);
+            }else {
+                setIsButtonLoading(false);
+                handleError(response);
+            }
+
+        })
+            .catch((_error) =>{
+                setIsButtonLoading(false);
+                alert("Error")
+            });
     }
 
     return (
         <div
-            className="pt-44 sm:pt-4 lg:pt-10 z-10 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
+            className=" select-none pt-[10vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
+            <MultiStepLoader loadingStates={registerLoadingStates} loading={isButtonLoading} duration={300} loop={false}/>
             <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
                 Welcome to Chime
             </h2>
@@ -32,18 +82,21 @@ export default function Signup({setIsUser}: SignupProps) {
                 Sign up to Chime to access all the features
             </p>
 
-            <form className="my-8" onSubmit={handleSubmit}>
+            <form className="my-8 pt-[4vh] sm:pt-2 md:pt-1 lg:pt-1" autoComplete="on" onSubmit={handleSubmit}>
                 <LabelInputContainer className="mb-4">
                     <Label htmlFor="email">Name</Label>
                     <Input name="name" id="name" type="text" autoComplete="name"/>
+                    {nameError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{nameError}</span>}
                 </LabelInputContainer>
                 <LabelInputContainer className="mb-4">
                     <Label htmlFor="email">Email Address</Label>
                     <Input name="email" id="email" type="email" autoComplete="email"/>
+                    {emailError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{emailError}</span>}
                 </LabelInputContainer>
                 <LabelInputContainer className="mb-4">
                     <Label htmlFor="password">Password</Label>
-                    <Input name="password" id="password" placeholder="••••••••" type="password"/>
+                    <Input name="password" id="password" autoComplete="new-password" placeholder="••••••••" type="password"/>
+                    {passwordError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{passwordError}</span>}
                 </LabelInputContainer>
                 <motion.button
                     className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
@@ -71,6 +124,38 @@ export default function Signup({setIsUser}: SignupProps) {
                     </span>
                         <BottomGradient/>
                     </motion.button>
+                    <Turnstile
+                        className="w-full items-center justify-center flex flex-col bg-white dark:bg-black"
+                        appearance="execute"
+                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                        retry="auto"
+                        refreshExpired="auto"
+                        sandbox={process.env.NODE_ENV === "development"}
+                        onError={() => {
+                            setTurnstileStatus("error");
+                            setError("Security check failed. Please try again.");
+                        }}
+                        onExpire={() => {
+                            setTurnstileStatus("expired");
+                            setError("Security check expired. Please verify again.");
+                        }}
+                        onLoad={() => {
+                            setTurnstileStatus("required");
+                            setError(null);
+                        }}
+                        onVerify={(token) => {
+                            setTurnstileStatus("success");
+                            setError(null);
+                        }}
+                    />
+                    {error && (
+                        <div
+                            className="flex items-center gap-2 text-red-500 text-sm mb-2"
+                            aria-live="polite"
+                        >
+                            <span>{error}</span>
+                        </div>
+                    )}
                     <div className="flex flex-row text-sm left-0 space-x-2 ml-1">
                         <h2 className="dark:text-gray-200">
                             Already have an account?

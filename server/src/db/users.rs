@@ -27,7 +27,7 @@ static STRONG_PASSWORD: Lazy<Regexes> = Lazy::new(|| {
 });
 
 
-#[derive(Debug, Validate, Deserialize, Serialize)]
+#[derive(Debug, Validate, Deserialize, Serialize, Clone)]
 pub struct User{
     pub id: uuid::Uuid,
     pub name: String,

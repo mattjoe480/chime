@@ -3,16 +3,13 @@ pub mod message;
 pub mod events;
 pub mod auth;
 
-use crate::model::credentials::Token;
+use crate::model::credentials::{AccessTokenClaims};
 use crate::rpc::auth::AuthServerImpl;
 use crate::rpc::events::{ChatServerImpl, ClientManager};
 use crate::rpc::ping::PingPongImpl;
 use crate::types::auth_server::AuthServer;
 use crate::types::chat_server::ChatServer;
 use crate::types::ping_server::PingServer;
-use futures::executor::block_on;
-use futures::future::BoxFuture;
-use futures::FutureExt;
 use lazy_static::lazy_static;
 use log::info;
 use prometheus::{register_counter, register_histogram_vec, Counter, HistogramVec};
@@ -42,12 +39,14 @@ pub mod proto{
         include_bytes!("../../proto/reflection/server_descriptor.bin");
 }
 
-fn is_valid_token(token: &str) -> BoxFuture<bool> {
-    Box::pin(async move{ 
-        let res = Token::get_cached_uid(token).await.is_some() ;
-        info!("Token {} is valid: {}", token, res);
-        res
-    }).boxed()
+fn is_valid_token(token: &str) -> bool {
+    if let Ok(token)=  AccessTokenClaims::from_jwt(token.to_string()){
+        info!("Token {:#?} is valid", token);
+        true
+    }
+    else { 
+        false
+    }
 }
 fn check_auth(req: Request<()>) -> Result<Request<()>, Status> {
     match req.metadata().get("authorization") {
@@ -55,8 +54,7 @@ fn check_auth(req: Request<()>) -> Result<Request<()>, Status> {
             let auth_str = t.to_str().unwrap_or(""); 
             if auth_str.starts_with("Bearer ") {
                 let token = auth_str[7..].to_string();
-                
-                if block_on(is_valid_token(&token)) {
+                if is_valid_token(&token) {
                     Ok(req)
                 } else {
                     info!("Invalid authorization token");

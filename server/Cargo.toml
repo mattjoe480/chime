@@ -58,6 +58,10 @@ features = ["sqlx-postgres", "runtime-tokio", "macros", "debug-print", "with-chr
 version = "0.19.0"
 features = ["derive_nightly_features"]
 
+[dependencies.reqwest]
+version = "0.12.12"
+features = ["default", "json"]
+
 [build-dependencies]
 tonic-build = "0.12.3"
 charybdis = "0.7.10"

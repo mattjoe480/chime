@@ -1,4 +1,5 @@
 #![feature(duration_constructors)]
+#![feature(async_closure)]
 
 mod db;
 mod controllers;

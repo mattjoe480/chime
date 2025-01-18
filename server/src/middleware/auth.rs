@@ -8,7 +8,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
 use futures::future::LocalBoxFuture;
 use tokio::time::Instant;
 use tracing::log::info;
-use crate::model::credentials::{Claims, Token};
+use crate::model::credentials::{AccessTokenClaims, RefreshTokenClaims};
 
 #[derive(Clone)]
 pub struct JwtMiddleware {
@@ -83,16 +83,13 @@ where
 
         info!("Secret key: {}", secret_key);
         Box::pin(async move {
-            match decode::<Claims>(
+            match decode::<AccessTokenClaims>(
                 &token,
                 &DecodingKey::from_secret(secret_key.as_bytes()),
                 &Validation::new(Algorithm::HS256),
             ) {
                 Ok(_token_data) => {
                     let start = Instant::now();
-                    if Token::get_cached_uid(&token).await.is_none() {
-                        return Err(ErrorUnauthorized("Invalid authorization token"))
-                    }
                     info!("Middleware took {:?}", start.elapsed());
                     fut.await
                 }

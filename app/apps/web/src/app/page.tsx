@@ -9,6 +9,17 @@ import { Dock } from "@/components/Dock";
 
 // @ts-ignore
 export default function Home() {
+    const { data: session, status } = useSession();
+    if (status === "loading") {
+        console.log("Login loading");
+    }
+    else if(status === "unauthenticated") {
+        console.log("Login unauthenticated");
+    }
+    else{
+        console.log("Login authenticated");
+        console.log(session)
+    }
     return (
         <AuroraBackground className="h-screen w-full absolute top-0 left-0 flex
             items-center justify-center">

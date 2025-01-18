@@ -29,7 +29,7 @@ export default function RootLayout({children,}: Readonly<{ children: ReactNode;
     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
     <ThemeProvider
         attribute="class"
-        defaultTheme="light"
+        defaultTheme="system"
         enableSystem
         disableTransitionOnChange>
         <Image

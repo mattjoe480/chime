@@ -11,7 +11,19 @@ enum Status {
   EXPIRED_TOKEN = 3;          
   ACCOUNT_LOCKED = 4;         
   USER_NOT_FOUND = 5;         
-  INVALID_PASSWORD = 6;       
+}
+
+enum AuthProvider {
+  GOOGLE = 0;
+  FACEBOOK = 1;
+  GITHUB = 2;
+}
+message OAuth {
+  string oauth_token = 1;
+  string expires_in = 2;
+  string expires_at = 3;
+  string providerAccountID = 4;
+  string provider = 5;
 }
 
 message Token {
@@ -30,7 +42,13 @@ message Token {
 message Credentials{
   string email = 1;
   string password = 2;
-  string client_id = 3;
+}
+
+message AuthRequest {
+  oneof data {
+    Credentials credentials = 1;
+    OAuth oauth = 2;
+  }
 }
 
 message AuthToken{
@@ -67,7 +85,7 @@ message RegisterStatus{
 }
 
 service auth{
-  rpc auth(Credentials) returns (Token);
+  rpc auth(AuthRequest) returns (Token);
   rpc token(RefreshToken) returns(AuthToken);
   rpc revoke(RefreshToken) returns(Revoke);
   rpc register(User) returns(RegisterStatus);

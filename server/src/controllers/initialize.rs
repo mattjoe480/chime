@@ -81,7 +81,8 @@ async fn init_db()->Result<(), ()>{
             debug!("Connected to database successfully");
             let mut lock = scylla_session.lock().await;
             let cache = CachingSession::from(session, 2000);
-            cache.get_session().use_keyspace("chime", false).await.unwrap();
+            cache.get_session().use_keyspace("chime", false)
+                .await.unwrap();
             *lock = Some(Scylla { conn : cache.into()});
             Ok(())
         }
@@ -109,7 +110,6 @@ async fn init_postgres()->Result<(), ()>{
         .idle_timeout(Duration::from_secs(8))
         .max_lifetime(Duration::from_secs(8))
         .sqlx_logging(true)
-        .sqlx_logging_level(log::LevelFilter::Info)
         .set_schema_search_path("public");
     let db = Database::connect(opt).await
         .expect("Cannot connect to postgres database");
