@@ -23,6 +23,7 @@ export default function SignIn({setIsUser}: SignInProps) {
     const [turnstileStatus, setTurnstileStatus] = useState<
         "success" | "error" | "expired" | "required"
     >("required");
+    const [showTurnstile, setShowTurnstile] = useState(false);
     const [error, setError] = useState<string | null>(null);
     async function loginWithGoogle() {
         signIn("google", {redirectTo: "/"}).catch(() => setIsLoading(false)).catch(() =>
@@ -36,7 +37,15 @@ export default function SignIn({setIsUser}: SignInProps) {
         let formData = new FormData(e.currentTarget);
         const email = formData.get("email")?.toString();
         const password = formData.get("password")?.toString();
-        const token: string | undefined = formData.get("cf-turnstile-response")?.toString();
+        let token: string | undefined = formData.get("cf-turnstile-response")?.toString();
+        if (token === undefined || token === "") {
+            if (setIsUser) {
+                setShowTurnstile(true);
+            }
+            setIsLoading(false);
+            setServerError("Please try again")
+            return;
+        }
         try {
             await signIn("credentials", {
                 email,
@@ -121,26 +130,27 @@ export default function SignIn({setIsUser}: SignInProps) {
 
                 </motion.button>
                 <Turnstile
-                    className="w-full items-center justify-center flex flex-col space-y-4"
-                    appearance="always"
+                    className={`w-full items-center justify-center  flex-col space-y-4 ${showTurnstile ? "flex" : "hidden"}`}
                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                     retry="auto"
                     refreshExpired="auto"
                     sandbox={process.env.NODE_ENV === "development"}
                     onError={() => {
                         setTurnstileStatus("error");
-                        setError("Security check failed. Please try again.");
+                        setServerError("Security check failed. Please try again.");
                     }}
                     onExpire={() => {
                         setTurnstileStatus("expired");
-                        setError("Security check expired. Please verify again.");
+                        setServerError("Security check expired. Please verify again.");
                     }}
                     onLoad={() => {
                         setTurnstileStatus("required");
+                        setShowTurnstile(true);
                         setError(null);
                     }}
                     onVerify={(token) => {
                         setTurnstileStatus("success");
+                        setShowTurnstile(false);
                         setError(null);
                     }}
                 />

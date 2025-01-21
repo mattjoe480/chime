@@ -4,7 +4,6 @@ import Credentials from "next-auth/providers/credentials";
 import {logger} from "@/lib/constants";
 import {validateTurnstileToken} from "next-turnstile";
 import {v4} from "uuid";
-import {redirect} from "next/navigation";
 
 export default { providers: [
 

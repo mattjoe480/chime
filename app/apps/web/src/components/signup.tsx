@@ -19,11 +19,12 @@ interface SignupProps {
 }
 
 export default function Signup({setIsUser}: SignupProps) {
-    const [isButtonLoading, setIsButtonLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
-    const [serverError, setServerError] = useState("")
+    const [serverError, setServerError] = useState("");
+    const [showTurnstile, setShowTurnstile] = useState(false);
     const [turnstileStatus, setTurnstileStatus] = useState<
         "success" | "error" | "expired" | "required"
     >("required");
@@ -61,21 +62,30 @@ export default function Signup({setIsUser}: SignupProps) {
         setEmailError("");
         setPasswordError("");
         setServerError("")
-        setIsButtonLoading(true);
+        setIsLoading(true);
         const formData = new FormData(e.currentTarget);
+        let token: string | undefined = formData.get("cf-turnstile-response")?.toString();
+        if (token === undefined || token === "") {
+            if (setIsUser) {
+                setShowTurnstile(true);
+            }
+            setIsLoading(false);
+            setServerError("Please try again")
+            return;
+        }
         await registerGrpc(formData).then((response) => {
             if (!response.isError && !response.isServerError){
                 setTimeout(() => {
-                    setIsButtonLoading(false);
+                    setIsLoading(false);
                     if (setIsUser) setIsUser(true);
                 },2500);
             }else {
-                setIsButtonLoading(false);
+                setIsLoading(false);
                 handleError(response);
             }
         })
             .catch((_error) =>{
-                setIsButtonLoading(false);
+                setIsLoading(false);
                 alert("Please contact the developer!");
             });
     }
@@ -83,7 +93,7 @@ export default function Signup({setIsUser}: SignupProps) {
     return (
         <div
             className=" select-none pt-[10vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full  mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
-            <MultiStepLoader loadingStates={registerLoadingStates} loading={isButtonLoading} duration={300} loop={false}/>
+            <MultiStepLoader loadingStates={registerLoadingStates} loading={isLoading} duration={300} loop={false}/>
             <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
                 Welcome to Chime
             </h2>
@@ -144,26 +154,27 @@ export default function Signup({setIsUser}: SignupProps) {
                         <BottomGradient/>
                     </motion.button>
                     <Turnstile
-                        className="w-full items-center justify-center flex flex-col bg-white dark:bg-black"
-                        appearance="always"
+                        className={`w-full items-center justify-center  flex-col space-y-4 ${showTurnstile ? "flex" : "hidden"}`}
                         siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                         retry="auto"
                         refreshExpired="auto"
                         sandbox={process.env.NODE_ENV === "development"}
                         onError={() => {
                             setTurnstileStatus("error");
-                            setError("Security check failed. Please try again.");
+                            setServerError("Security check failed. Please try again.");
                         }}
                         onExpire={() => {
                             setTurnstileStatus("expired");
-                            setError("Security check expired. Please verify again.");
+                            setServerError("Security check expired. Please verify again.");
                         }}
                         onLoad={() => {
                             setTurnstileStatus("required");
+                            setShowTurnstile(true);
                             setError(null);
                         }}
                         onVerify={(token) => {
                             setTurnstileStatus("success");
+                            setShowTurnstile(false);
                             setError(null);
                         }}
                     />

@@ -45,7 +45,7 @@ export function Hero() {
     const { theme, setTheme } = useTheme();
     let boxColor = "#6C6EE6";
     return (
-        <div className="size-full max-w-lg items-center justify-center overflow-hidden pt-8">
+        <div className="size-full max-w-lg items-center justify-center overflow-y-visible pt-[14%]  pl-[100px]">
             <BoxReveal boxColor={boxColor} duration={0.5}>
                 <p className={`text-[5.5rem] font-semibold dark:text-white ${logirent.className} antialiased`}>
                     ChimeUp<span className="text-[#5046e6]">.</span>
