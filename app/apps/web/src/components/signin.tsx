@@ -10,6 +10,8 @@ import {MultiStepLoader} from "@/components/ui/multi-step-loader";
 import {logger, loginLoadingStates} from "@/lib/constants";
 import {useRouter} from "next/navigation";
 import {Turnstile} from "next-turnstile";
+import {CircleX} from "lucide-react";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 
 interface SignInProps{
     setIsUser?: (value: (((prevState: boolean) => boolean) | boolean)) => void
@@ -17,6 +19,7 @@ interface SignInProps{
 export default function SignIn({setIsUser}: SignInProps) {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const [serverError, setServerError] = useState("");
     const [turnstileStatus, setTurnstileStatus] = useState<
         "success" | "error" | "expired" | "required"
     >("required");
@@ -28,12 +31,12 @@ export default function SignIn({setIsUser}: SignInProps) {
     }
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        setServerError("")
         setIsLoading(true)
         let formData = new FormData(e.currentTarget);
         const email = formData.get("email")?.toString();
         const password = formData.get("password")?.toString();
         const token: string | undefined = formData.get("cf-turnstile-response")?.toString();
-
         try {
             await signIn("credentials", {
                 email,
@@ -41,22 +44,28 @@ export default function SignIn({setIsUser}: SignInProps) {
                 token,
                 redirect: false
             }).then((status) => {
-                if (!status) setIsLoading(false);
-                if (status?.ok) setTimeout(() => {
-                    logger.debug(status);
+                if (!status){
+                    setIsLoading(false);
+                    setServerError("Please try again")
+                }
+                if (status?.error !== null && status?.code !== null){
+                    setIsLoading(false);
+                    setServerError("Invalid Credentials Username / Password")
+                }
+                if (status?.ok && status?.url !== null) setTimeout(() => {
                     router.push("/");
-                }, 2500);
+                }, 1400);
             });
         } catch (error) {
-
-            setIsLoading(false)
-            logger.debug(error)
+            setIsLoading(false);
+            console.log("Error: " +error);
+            setServerError("Invalid Credentials Username / Password")
         }
 
 
         }
   return (
-    <div className="pt-[14vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
+    <div className="pt-[14vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full mx-auto border-[1px] dark:border-none rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
         <MultiStepLoader loadingStates={loginLoadingStates} loading={isLoading} duration={300} loop={false}/>
       <h2 className="font-sans font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
         Welcome to Chime
@@ -66,6 +75,15 @@ export default function SignIn({setIsUser}: SignInProps) {
       </p>
 
         <form className="my-8 pt-[6vh] sm:pt-2 md:pt-1 lg:pt-1"  onSubmit={handleSubmit}>
+           {serverError !== "" && (
+                        <Alert className="mb-4">
+                        <CircleX color="red" className="h-4 w-4"/>
+                        <AlertTitle className="text-red-500 text-md">Cannot login</AlertTitle>
+                        <AlertDescription>
+                            {serverError}
+                        </AlertDescription>
+                    </Alert>
+                )}
             <LabelInputContainer className="mb-4">
                 <Label htmlFor="email">Email Address</Label>
                 <Input name="email" id="email" type="email" autoComplete="email"/>
@@ -75,7 +93,7 @@ export default function SignIn({setIsUser}: SignInProps) {
                 <Input name="password" id="password" placeholder="••••••••" type="password"/>
             </LabelInputContainer>
             <motion.button
-                className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+                className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-700 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
                 type="submit"
                 whileHover={{scale: 1.1}}
                 whileTap={{scale: 0.90}}
@@ -89,7 +107,7 @@ export default function SignIn({setIsUser}: SignInProps) {
 
             <div className="flex flex-col space-y-4">
                 <motion.button
-                    className="relative group/btn flex space-x-2 items-center justify-center px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+                    className="relative group/btn flex space-x-2 items-center border-[1px] dark:border-none justify-center px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
                     whileHover={{scale: 1.1}}
                     whileTap={{scale: 0.90}}
                     type="button"
@@ -104,7 +122,7 @@ export default function SignIn({setIsUser}: SignInProps) {
                 </motion.button>
                 <Turnstile
                     className="w-full items-center justify-center flex flex-col space-y-4"
-                    appearance={process.env.NODE_ENV === "development"? "execute": "interaction-only"}
+                    appearance="always"
                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                     retry="auto"
                     refreshExpired="auto"
@@ -165,12 +183,11 @@ const BottomGradient = () => {
     );
 };
 
-const LabelInputContainer = ({
-                                 children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
+const LabelInputContainer = ({children,
+                                 className,
+                             }: {
+    children: React.ReactNode;
+    className?: string;
 }) => {
   return (
     <div className={cn("flex flex-col space-y-2 w-full", className)}>

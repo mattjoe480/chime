@@ -5,6 +5,6 @@ services:
       context: ./
       dockerfile: Dockerfile
     env_file:
-      - .env.production
+      - .env.local
     ports:
       - "3000:3000"

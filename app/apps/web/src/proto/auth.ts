@@ -13,7 +13,15 @@ export namespace auth {
         INVALID_CREDENTIALS = 2,
         EXPIRED_TOKEN = 3,
         ACCOUNT_LOCKED = 4,
-        USER_NOT_FOUND = 5
+        USER_NOT_FOUND = 5,
+        MFA_REQUIRED = 6,
+        MFA_FAILED = 7,
+        INVALID_TOKEN = 8,
+        DUPLICATE_EMAIL = 9,
+        WEAK_PASSWORD = 10,
+        INVALID_PROVIDER = 11,
+        INTERNAL_ERROR = 12,
+        INVALID_EMAIL = 13
     }
     export enum AuthProvider {
         GOOGLE = 0,

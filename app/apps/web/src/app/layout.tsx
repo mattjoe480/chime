@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {ThemeProvider} from "@/components/theme-provider";
-import Image from "next/image";
-import Logo from './icons/brand.svg';
 import {ReactNode} from "react";
 import {SessionProvider} from "next-auth/react";
+import localFont from "next/font/local";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +15,19 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const logirent = localFont({
+    src: [
+        {
+            path: '../../public/fonts/logirent-regular.ttf',
+            weight: '400'
+        },
+        {
+            path: '../../public/fonts/logirent-bold.ttf',
+            weight: '700'
+        },
+    ]
+})
 
 export const metadata: Metadata = {
     title: "Chime",
@@ -32,12 +44,6 @@ export default function RootLayout({children,}: Readonly<{ children: ReactNode;
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange>
-        <Image
-        priority
-        src={Logo}
-        alt="Follow us on Twitter"
-        className="fixed z-50 top-0 left-0 sm:w-[100px] md:w-[150px] -py-3.5 hidden md:block lg:block"
-    />
         <SessionProvider>
             {children}
         </SessionProvider>

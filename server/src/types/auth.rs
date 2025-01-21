@@ -115,6 +115,14 @@ pub enum Status {
     ExpiredToken = 3,
     AccountLocked = 4,
     UserNotFound = 5,
+    MfaRequired = 6,
+    MfaFailed = 7,
+    InvalidToken = 8,
+    DuplicateEmail = 9,
+    WeakPassword = 10,
+    InvalidProvider = 11,
+    InternalError = 12,
+    InvalidEmail = 13,
 }
 impl Status {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -129,6 +137,14 @@ impl Status {
             Self::ExpiredToken => "EXPIRED_TOKEN",
             Self::AccountLocked => "ACCOUNT_LOCKED",
             Self::UserNotFound => "USER_NOT_FOUND",
+            Self::MfaRequired => "MFA_REQUIRED",
+            Self::MfaFailed => "MFA_FAILED",
+            Self::InvalidToken => "INVALID_TOKEN",
+            Self::DuplicateEmail => "DUPLICATE_EMAIL",
+            Self::WeakPassword => "WEAK_PASSWORD",
+            Self::InvalidProvider => "INVALID_PROVIDER",
+            Self::InternalError => "INTERNAL_ERROR",
+            Self::InvalidEmail => "INVALID_EMAIL",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -140,6 +156,14 @@ impl Status {
             "EXPIRED_TOKEN" => Some(Self::ExpiredToken),
             "ACCOUNT_LOCKED" => Some(Self::AccountLocked),
             "USER_NOT_FOUND" => Some(Self::UserNotFound),
+            "MFA_REQUIRED" => Some(Self::MfaRequired),
+            "MFA_FAILED" => Some(Self::MfaFailed),
+            "INVALID_TOKEN" => Some(Self::InvalidToken),
+            "DUPLICATE_EMAIL" => Some(Self::DuplicateEmail),
+            "WEAK_PASSWORD" => Some(Self::WeakPassword),
+            "INVALID_PROVIDER" => Some(Self::InvalidProvider),
+            "INTERNAL_ERROR" => Some(Self::InternalError),
+            "INVALID_EMAIL" => Some(Self::InvalidEmail),
             _ => None,
         }
     }

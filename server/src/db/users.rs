@@ -9,19 +9,23 @@ use argon2::password_hash::SaltString;
 use argon2::{password_hash, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use charybdis::types::Uuid;
 use chrono::{DateTime, Utc};
-use log::error;
 use sea_orm::prelude::DateTimeWithTimeZone;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait};
 use serde::{Deserialize, Serialize};
 use tokio::time::Instant;
-use tracing::debug;
+use tracing::{debug, error, error_span, info};
 use validator::{Validate, ValidationError, ValidationErrors};
 use once_cell::sync::Lazy;
+use regex::Regex;
 use regex_filtered::{Builder, Regexes};
+use crate::types;
+
+
 static STRONG_PASSWORD: Lazy<Regexes> = Lazy::new(|| {
     Builder::new()
-        .push(r"^[A-Za-z\d!@#$%^&*()_+={}\[\]:;\'<>,.?/\\|`~\-_]{8,}$").unwrap()
+        .push_all(vec![r"^^[A-Za-z\d\W_]{8,}$", r"[a-z]", r"[A-Z]", r"\d", r"[\W_]"])
+        .unwrap()
         .build().unwrap()
 
 });
@@ -66,8 +70,9 @@ impl User {
         Ok(user)
 
     }
-    pub async fn insert_new_user(self) -> Result<(), String> {
+    pub async fn insert_new_user(self) -> Result<(), types::Status> {
         let db = get_postgres_conn();
+        let email= self.email.clone();
         let user =  UserActiveModel{
             id: Set(self.id),
             name: Set(self.name),
@@ -79,7 +84,12 @@ impl User {
             role: Set(self.role),
         };
         if let Err(e) = user.insert(&db.await).await{
-            return Err(format!("Cannot insert user: {}", e))
+            if e.to_string().contains("users_email_key") {
+                error!("Duplicate email error: {}", email);
+                return Err(types::Status::DuplicateEmail)
+            }
+
+            return Err(types::Status::InternalError)
         }
         Ok(())
     }
@@ -192,8 +202,11 @@ impl Into<UserActiveModel> for User{
 }
 
 fn validate_password(value: &&String) -> Result<(), ValidationError> {
-    if STRONG_PASSWORD.is_match(value){
+    let time = Instant::now();
+    if STRONG_PASSWORD.matching(value).count() == 5{
+        info!("Time to parse {}", time.elapsed().as_millis());
         return Ok(());
     }
+    info!("Time to parse {}", time.elapsed().as_millis());
     Err(ValidationError::new("Password not allowed"))
 }

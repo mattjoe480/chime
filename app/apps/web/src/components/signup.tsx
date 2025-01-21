@@ -11,6 +11,8 @@ import {MultiStepLoader} from "@/components/ui/multi-step-loader";
 import {registerLoadingStates} from "@/lib/constants";
 import {SignInResponse} from "@/lib/types";
 import { Turnstile } from "next-turnstile";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
+import {CircleX} from "lucide-react";
 
 interface SignupProps {
     setIsUser?: (value: (((prevState: boolean) => boolean) | boolean)) => void
@@ -21,13 +23,15 @@ export default function Signup({setIsUser}: SignupProps) {
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+    const [serverError, setServerError] = useState("")
     const [turnstileStatus, setTurnstileStatus] = useState<
         "success" | "error" | "expired" | "required"
     >("required");
     const [error, setError] = useState<string | null>(null);
 
     async function handleError(signinError: SignInResponse) {
-        if (signinError.fields && signinError.fields.length > 0) {
+        console.log(signinError)
+        if (signinError.fields && signinError.fields.length > 0 && !signinError.isServerError) {
             for (let i = 0; i < signinError.fields.length; i++) {
                 switch (signinError.fields[i]) {
                     case "name":
@@ -45,16 +49,22 @@ export default function Signup({setIsUser}: SignupProps) {
                 }
             }
         }
+        if (signinError.isServerError) {
+            let err = signinError.fields!.at(0) as string;
+            err = err.replace("_", " ").toLowerCase()
+            setServerError(err.charAt(0).toUpperCase() + err.slice(1))
+        }
     }
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setNameError("");
         setEmailError("");
         setPasswordError("");
+        setServerError("")
         setIsButtonLoading(true);
         const formData = new FormData(e.currentTarget);
         await registerGrpc(formData).then((response) => {
-            if (!response.isError){
+            if (!response.isError && !response.isServerError){
                 setTimeout(() => {
                     setIsButtonLoading(false);
                     if (setIsUser) setIsUser(true);
@@ -63,17 +73,16 @@ export default function Signup({setIsUser}: SignupProps) {
                 setIsButtonLoading(false);
                 handleError(response);
             }
-
         })
             .catch((_error) =>{
                 setIsButtonLoading(false);
-                alert("Error")
+                alert("Please contact the developer!");
             });
     }
 
     return (
         <div
-            className=" select-none pt-[10vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
+            className=" select-none pt-[10vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full  mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
             <MultiStepLoader loadingStates={registerLoadingStates} loading={isButtonLoading} duration={300} loop={false}/>
             <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
                 Welcome to Chime
@@ -83,6 +92,15 @@ export default function Signup({setIsUser}: SignupProps) {
             </p>
 
             <form className="my-8 pt-[4vh] sm:pt-2 md:pt-1 lg:pt-1" autoComplete="on" onSubmit={handleSubmit}>
+                {serverError !== "" && (
+                        <Alert className="mb-4">
+                        <CircleX color="red" className="h-4 w-4"/>
+                        <AlertTitle className="text-red-500 text-md">Cannot register</AlertTitle>
+                        <AlertDescription>
+                            {serverError}
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <LabelInputContainer className="mb-4">
                     <Label htmlFor="email">Name</Label>
                     <Input name="name" id="name" type="text" autoComplete="name"/>
@@ -99,7 +117,7 @@ export default function Signup({setIsUser}: SignupProps) {
                     {passwordError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{passwordError}</span>}
                 </LabelInputContainer>
                 <motion.button
-                    className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+                    className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-700 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
                     type="submit"
                     whileHover={{scale: 1.1}}
                     whileTap={{scale: 0.90}}
@@ -107,6 +125,7 @@ export default function Signup({setIsUser}: SignupProps) {
                     Sign up &rarr;
                     <BottomGradient/>
                 </motion.button>
+
                 <div
                     className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full"/>
 
@@ -126,7 +145,7 @@ export default function Signup({setIsUser}: SignupProps) {
                     </motion.button>
                     <Turnstile
                         className="w-full items-center justify-center flex flex-col bg-white dark:bg-black"
-                        appearance="execute"
+                        appearance="always"
                         siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                         retry="auto"
                         refreshExpired="auto"

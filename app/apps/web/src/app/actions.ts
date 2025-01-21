@@ -13,18 +13,17 @@ import {validateTurnstileToken} from "next-turnstile";
 export async function registerGrpc(formData: FormData) : Promise<SignInResponse> {
     let token: string | undefined = formData.get("cf-turnstile-response")?.toString();
     if (token === undefined) {
-        return Promise.resolve({isError: true, fields: undefined, error: ["Capcha failed"]});
+        return Promise.resolve({isError: true, isServerError:false, fields: undefined, error: ["Capcha failed"]});
     }
     const validationResponse = await validateTurnstileToken({
         token,
         secretKey: process.env.TURNSTILE_SECRET_KEY!,
-        // Optional: Add an idempotency key to prevent token reuse
         idempotencyKey: v4(),
         sandbox: process.env.NODE_ENV === "development",
     });
 
     if (!validationResponse.success) {
-        return Promise.resolve({isError: true, fields: undefined, error: ["Capcha failed"]});
+        return Promise.resolve({isError: true, isServerError:false, fields: undefined, error: ["Capcha failed"]});
     }
     let user = new User();
     user.name = formData.get('name')?.toString()!;
@@ -37,14 +36,18 @@ export async function registerGrpc(formData: FormData) : Promise<SignInResponse>
         const { errors: err } = response.error;
         return Promise.resolve( {
             isError: true,
+            isServerError:false,
             fields: err.map((e) => e.path[0]),
             error: err.map((e) => e.message)
         });
     }
     let data = await register(user);
     if (!data) {
-        return Promise.resolve({isError: true, fields: undefined, error: ["Internal server error"]});
+        return Promise.resolve({isError: true, isServerError:true, fields: undefined, error: ["Internal server error"]});
     }
-    return Promise.resolve({isError: false, fields: undefined, error: undefined});
+    if (auth.Status[data.status] !== "AUTH_SUCCESS") {
+        return Promise.resolve({isError: false, isServerError:true, fields: [data.status], error: undefined});
+    }
+    return Promise.resolve({isError: false, isServerError:false, fields: undefined, error: undefined});
 
 }

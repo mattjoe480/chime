@@ -11,14 +11,13 @@ use crate::types::auth_server::AuthServer;
 use crate::types::chat_server::ChatServer;
 use crate::types::ping_server::PingServer;
 use lazy_static::lazy_static;
-use log::info;
 use prometheus::{register_counter, register_histogram_vec, Counter, HistogramVec};
 use std::sync::Arc;
 use std::{env, thread};
 use tonic::transport::Server;
 use tonic::{Request, Status};
 use tonic_reflection::server::Builder;
-use tracing::debug;
+use tracing::{debug, info};
 
 
 lazy_static! {

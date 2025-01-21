@@ -1,9 +1,10 @@
-import type { NextAuthConfig } from "next-auth"
+import {CredentialsSignin, type NextAuthConfig } from "next-auth"
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import {logger} from "@/lib/constants";
 import {validateTurnstileToken} from "next-turnstile";
 import {v4} from "uuid";
+import {redirect} from "next/navigation";
 
 export default { providers: [
 
@@ -31,9 +32,10 @@ export default { providers: [
                 });
 
                 if (!validationResponse.success) {
-                    return null;
+                    throw new CredentialsSignin("Please verify that you are a human");
                 }
-                const response = await fetch("http://localhost:3000/api/login/credentials", {
+                const url = process.env.URL + '/api/login/credentials';
+                const response = await fetch(url, {
                     headers: {
                         "Content-Type": "application/json"
                     },
@@ -42,13 +44,14 @@ export default { providers: [
                 });
                 if (!response.ok) {
                     const error = await response.text()
-                    logger.error(`Login failed: ${error || "Internal server error"}`);
-                    return null;
+                    console.log(`Login failed: ${error || "Internal server error"}`);
+                    throw new CredentialsSignin("Cannot connect to the server");
                 }
                 const user = await response.json();
+                console.log(user);
                 if (!user || typeof user !== 'object') {
-                    logger.error("Invalid response from server");
-                    return null;
+                    console.log("Invalid response from server");
+                    throw new CredentialsSignin("Invalid response from server");
                 }
                 if (user.status === 0 && user.error_message === '') return {
                     id: user.uid,
@@ -57,7 +60,7 @@ export default { providers: [
                     refresh_token: user.refresh_token
 
                 };
-                return null;
+                throw new CredentialsSignin("InvalidCredentials Username/Password");
             }
         })
     ],
@@ -81,7 +84,8 @@ export default { providers: [
             }
             if (user && account?.provider === "google") {
                 const {access_token, expires_in, expires_at, provider,  providerAccountId} = account
-                const response = await fetch("http://localhost:3000/api/login/google", {
+                const url = process.env.URL + '/api/login/google';
+                const response = await fetch(url, {
                     headers: {
                         "Content-Type": "application/json"
                     },
@@ -108,33 +112,6 @@ export default { providers: [
             return token;
         },
 
-        async signIn({ user, account, profile, email, credentials }) {
-            console.log(user, account, profile, email, credentials)
-            if(account?.provider === "google") {
-                const {access_token, expires_in, expires_at, provider,  providerAccountId} = account
-                const response = await fetch("http://localhost:3000/api/login/google", {
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({oauth_token: access_token , expires_in, expires_at, providerAccountId, provider}),
-                    method: "POST"
-                }).catch(
-                    (e) => {
-                        logger.error(e);
-                        return false;
-                    }
-                );
-                if (response instanceof Response) {
-                    let data = await response.json();
-                    logger.debug(data);
-                    const {error} = data;
-                   return !error;
-
-                }
-                return false;
-            }
-            return true;
-        },
         async session({ session, token }) {
             if (token) {
                 // @ts-ignore
@@ -150,4 +127,5 @@ export default { providers: [
             return session;
         },
     },
+    debug: false
 } satisfies NextAuthConfig

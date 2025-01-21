@@ -1,10 +1,17 @@
 "use client"
 import { AuroraBackground } from "@/components/ui/aurora-background"
 import { motion } from "framer-motion"
-import Hero from "@/components/Hero";
-import {useRouter} from "next/navigation";
+import {Hero} from "@/components/Hero";
 import {useSession} from "next-auth/react";
-import { Dock } from "@/components/Dock";
+import Image from "next/image";
+import Logo from "@/app/icons/brand.svg";
+import {ThemeToggle} from "@/components/themeToggle";
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuList,
+} from "@/components/ui/navigation-menu"
+import {logirent} from "@/lib/constants";
 
 
 // @ts-ignore
@@ -21,21 +28,30 @@ export default function Home() {
         console.log(session)
     }
     return (
-        <AuroraBackground className="h-screen w-full absolute top-0 left-0 flex
-            items-center justify-center">
-                    <motion.div
-                        initial={{opacity: 0.0, y: 40}}
-                        whileInView={{opacity: 1, y: 0}}
-                        transition={{
-                            delay: 0.3,
-                            duration: 0.8,
-                            ease: "easeInOut",
-                        }}
-                        className="max-w-7xl w-full"
-                    >
-                        <Hero/>
-                    </motion.div>
-                    <Dock/>
+        <AuroraBackground className="h-screen w-full absolute top-0 left-0 border-grid flex flex-1 flex-col
+            items-center justify-center overflow-y-auto overflow-x-hidden">
+            <NavigationMenu className="sm:flex flex-row grow top-0 items-center justify-between fixed md:h-[3rem] h-[4rem] z-50 min-w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <NavigationMenuList className="justify-start">
+                    <NavigationMenuItem className="hidden md:flex flex-row">
+                        <Image
+                            priority
+                            src={Logo}
+                            alt="Chime"
+                            className="flex h-[40px] lg:h-[90px] pr-20"
+                        />
+                    </NavigationMenuItem>
+                    <p className={`fixed left-[45%] justify-center items-center ${logirent.className} antialiased text-3xl select-none text-black dark:text-white`}>
+                        ChimeUp
+                    </p>
+                </NavigationMenuList>
+               <NavigationMenuList className="flex flex-1 items-center justify-between gap-2 md:justify-end mr-4">
+                   <ThemeToggle/>
+               </NavigationMenuList>
+            </NavigationMenu>
+            <div className="flex justify-start p-8 items-center md:mr-[45%]">
+                <Hero/>
+            </div>
+
         </AuroraBackground>
     )
 }

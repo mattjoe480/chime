@@ -100,20 +100,36 @@ impl Auth for AuthServerImpl {
 
         match result {
             Ok(user) => {
-                if user.insert_new_user().await.is_ok() {
+                if let Err(e) = user.insert_new_user().await{
                     return Ok(Response::new(RegisterStatus {
-                        status: auth::Status::AuthSuccess.into()
+                        status: e.into()
                     }))
                 }
-                Ok(Response::new(RegisterStatus {
-                    status: auth::Status::InvalidCredentials.into()
+                 Ok(Response::new(RegisterStatus {
+                    status: auth::Status::AuthSuccess.into()
                 }))
             },
             Err(e) => {
-                for (k, v) in e.0.iter() {
-                    debug!("Validation errors: {}",k);
+                if e.0.len() > 1 {
+                    return Ok(Response::new(RegisterStatus {
+                        status: auth::Status::InvalidCredentials.into()
+                    }))
                 }
-                Ok(Response::new(RegisterStatus {
+                let msg = e.0;
+                if msg.contains_key("password") {
+                    info!("Validation error password: {}", msg.contains_key("password"));
+                    return Ok(Response::new(RegisterStatus {
+                        status: auth::Status::WeakPassword.into()
+                    }))
+                }
+                else if msg.contains_key("email") {
+                    info!("Validation error email: {}", msg.contains_key("email"));
+                    return Ok(Response::new(RegisterStatus {
+                        status: auth::Status::InvalidEmail.into()
+                    }))
+                }
+
+                 Ok(Response::new(RegisterStatus {
                     status: auth::Status::InvalidCredentials.into()
                 }))
             }

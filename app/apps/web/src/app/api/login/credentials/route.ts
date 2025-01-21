@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
             let loginData = new authGrpc.Credentials();
             loginData.email = email as string;
             loginData.password = password as string;
-            console.debug(loginData)
+            console.debug(loginData.toObject())
             let req = new authGrpc.AuthRequest({credentials: loginData});
             let data=  await login(req);
-            console.debug(data)
+            console.debug(data.toObject())
             return Response.json(data.toObject());
         }
         catch (e){
