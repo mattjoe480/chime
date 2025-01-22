@@ -1,0 +1,70 @@
+import pino from 'pino';
+export const loginLoadingStates = [
+    {
+        text: "Preparing your secret lair...",
+    },
+    {
+        text: "Dusting off the login credentials...",
+    },
+    {
+        text: "Firing up the rocket boosters 🚀...",
+    },
+    {
+        text: "Summoning the login gods... ⏳",
+    },
+    {
+        text: "Almost there... Your password is being... decoded?",
+    },
+    {
+        text: "Unlocking the mystery of the internet...",
+    },
+    {
+        text: "Accessing the hidden realms of your account...",
+    },
+    {
+        text: "Voila! You’re in! 🎉 The digital world is yours!",
+    },
+];
+
+export const registerLoadingStates = [
+    {
+        text: "Building your digital identity...",
+    },
+    {
+        text: "Finding your perfect username...",
+    },
+    {
+        text: "Crafting the perfect password...",
+    },
+    {
+        text: "Checking if your email is valid... 🧐",
+    },
+    {
+        text: "Generating your secret agent profile...",
+    },
+    {
+        text: "Engraving your digital signature... ✍️",
+    },
+    {
+        text: "Assembling your personalized dashboard...",
+    },
+    {
+        text: "And... you’re ready to rock! 🎸 Welcome aboard!",
+    },
+];
+
+
+const logger = pino({
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',  // Adjust log level for production or development
+    transport: process.env.NODE_ENV === 'production'
+        ? undefined // No pretty logging in production
+        : {
+            target: 'pino-pretty',
+            options: {
+                translateTime: 'yyyy-mm-dd HH:MM:ss.l',
+                ignore: 'pid,hostname',
+            },
+        },
+});
+
+export default logger;
