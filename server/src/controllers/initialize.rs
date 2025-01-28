@@ -9,7 +9,7 @@ use redis::{Client, Connection};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use tokio::sync::{Mutex, MutexGuard};
 use tracing::{debug, error, info};
-use crate::db::{Scylla};
+use crate::db::Scylla;
 
 lazy_static!{
     static ref jwt_ttl: String = env::var("JWT_TTL").unwrap_or("60".to_string());
@@ -19,8 +19,6 @@ lazy_static!{
     static ref scylla_uri: String = env::var("SCYLLA_URL").unwrap_or("127.0.0.1:9042".to_string());
     static ref scylla_session: Arc<Mutex<Option<Scylla>>> = Arc::new(Mutex::new(None));
     static ref postgres_user: String = env::var("POSTGRES_USER").unwrap_or("chime".to_string());
-    // static ref postgres_password: String = env::var("POSTGRES_PASSWORD").unwrap_or("chime".to_string());
-    // static ref postgres_uri: String = env::var("POSTGRES_URI").expect("Set POSTGRES_URI");
     static ref postgres_conn: Arc<Mutex<Option<DatabaseConnection>>> = Arc::new(Mutex::new(None)); 
 }
 
@@ -57,9 +55,7 @@ pub async fn get_redis_conn() -> MutexGuard<'static, Option<Connection>> {
     lock
 }
 
-pub async fn get_jwt_ttl() -> String {
-    jwt_ttl.clone()
-}
+
 pub async fn get_jwt_secret_key() -> String {
     jwt_secret_key.clone()
 }

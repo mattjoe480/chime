@@ -1,0 +1,26 @@
+{
+    "configurations": [
+
+    {
+        "type": "lldb",
+        "request": "launch",
+        "name": "Cargo launch",
+        "cargo": {
+            "args": [
+                "build",
+            ],
+            "cwd": "${workspaceRoot}/server"
+        },
+        "args": [],
+        "cwd": "${workspaceRoot}/server"
+    },
+    {
+      "name": "Next.js: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm run dev",
+      "cwd": "${workspaceRoot}/app/apps/web"
+
+    },
+    ]
+}

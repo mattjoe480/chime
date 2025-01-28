@@ -12,7 +12,7 @@ impl MigrationTrait for Migration {
             return Ok(());
         }
         let db = manager.get_connection();
-        db.execute_unprepared("CREATE TYPE ROLE AS ENUM ('admin', 'user', 'mod')")
+        db.execute_unprepared("CREATE TYPE ROLE AS ENUM ('admin', 'user', 'mod', 'doctor')")
             .await.expect("Failed to create ");
         db.execute_unprepared("
         CREATE TABLE IF NOT EXISTS Users (

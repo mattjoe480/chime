@@ -34,6 +34,8 @@ pub struct Token {
     pub mfa_required: bool,
     #[prost(message, optional, tag = "10")]
     pub last_login: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(string, tag = "11")]
+    pub role: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Credentials {

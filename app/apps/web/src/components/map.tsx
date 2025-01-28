@@ -8,7 +8,7 @@ export default function Connectivity() {
             <div className="max-w-7xl mx-auto text-center">
                 <p className="font-bold text-xl md:text-4xl dark:text-white text-black">
                     Remote{" "}
-                    <span className="text-neutral-400">
+                    <span className="text-neutral-700 dark:text-neutral-400">
             {"Connectivity".split("").map((word, idx) => (
                 <motion.span
                     key={idx}
@@ -22,7 +22,7 @@ export default function Connectivity() {
             ))}
           </span>
                 </p>
-                <p className="text-sm md:text-lg text-neutral-400 max-w-2xl mx-auto py-4">
+                <p className="text-sm md:text-lg lg:text-xl font-semibold text-neutral-700 dark:text-neutral-400 max-w-2xl mx-auto py-4">
                     We have significantly improved medical connectivity by enabling patients to access healthcare services remotely,
                     bridging geographical gaps, and reducing barriers to timely care.
                 </p>

@@ -45,6 +45,7 @@ message Token {
   google.protobuf.Timestamp refresh_token_expiration = 8; 
   bool mfa_required = 9;                
   google.protobuf.Timestamp last_login = 10;  
+  string role = 11;
 }
 
 message Credentials{

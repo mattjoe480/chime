@@ -151,6 +151,7 @@ impl AuthServerImpl {
             refresh_token_expiration: None,
             mfa_required: false,
             last_login: None,
+            role: "".to_string(),
         }))
     }
     async fn token_credentials(&self, credentials: Credentials) -> Result<Response<Token>, Status> {
@@ -226,6 +227,7 @@ impl AuthServerImpl {
                 refresh_token_expiration,
                 mfa_required: false,
                 last_login: None,
+                role: format!("{:?}", user.role),
             }))
         }else {
             let id = user.id.to_string();
@@ -249,6 +251,7 @@ impl AuthServerImpl {
                 refresh_token_expiration: Some(refresh_token_expiration),
                 mfa_required: false,
                 last_login: None,
+                role: format!("{:?}", user.role),
             }))
         }
     }

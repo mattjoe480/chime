@@ -112,7 +112,8 @@ impl User {
         debug!("Failed to fetch user in {}", time.elapsed().as_millis());
         None
     }
-    
+        
+
     pub async fn find_by_id(uid: &String) -> Option<Self>{
         let time = Instant::now();
         let conn = get_postgres_conn();
