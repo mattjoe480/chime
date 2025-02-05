@@ -1,41 +1,49 @@
-use sea_orm::QueryFilter;
 use crate::controllers::initialize::get_postgres_conn;
 use crate::entity::sea_orm_active_enums::Role;
 use crate::entity::users::ActiveModel as UserActiveModel;
-use crate::entity::users::Model as UserModel;
 use crate::entity::users::Entity as UserEntity;
+use crate::entity::users::Model as UserModel;
+use crate::types::auth::Status as AuthStatus;
+use crate::types::onboarding::Status as OnboardingStatus;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{password_hash, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use charybdis::types::Uuid;
 use chrono::{DateTime, Utc};
+use once_cell::sync::Lazy;
+use regex::Regex;
+use regex_filtered::{Builder, Regexes};
 use sea_orm::prelude::DateTimeWithTimeZone;
 use sea_orm::ActiveValue::Set;
+use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait};
 use serde::{Deserialize, Serialize};
 use tokio::time::Instant;
 use tracing::{debug, error, error_span, info};
 use validator::{Validate, ValidationError, ValidationErrors};
-use once_cell::sync::Lazy;
-use regex::Regex;
-use regex_filtered::{Builder, Regexes};
-use crate::types;
-
 
 static STRONG_PASSWORD: Lazy<Regexes> = Lazy::new(|| {
     Builder::new()
-        .push_all(vec![r"^^[A-Za-z\d\W_]{8,}$", r"[a-z]", r"[A-Z]", r"\d", r"[\W_]"])
+        .push_all(vec![
+            r"^^[A-Za-z\d\W_]{8,}$",
+            r"[a-z]",
+            r"[A-Z]",
+            r"\d",
+            r"[\W_]",
+        ])
         .unwrap()
-        .build().unwrap()
-
+        .build()
+        .unwrap()
 });
 
-
 #[derive(Debug, Validate, Deserialize, Serialize, Clone)]
-pub struct User{
+pub struct User {
     pub id: uuid::Uuid,
     pub name: String,
-    #[validate(email, contains(pattern = "gmail", message = "Email must be valid gmail address"))]
+    #[validate(
+        email,
+        contains(pattern = "gmail", message = "Email must be valid gmail address")
+    )]
     pub email: String,
     #[validate(custom(function = "validate_password"))]
     password: Option<String>,
@@ -46,11 +54,20 @@ pub struct User{
 }
 
 impl User {
-    pub async fn new(name: String, email:String, password:Option<String>, provider: String, provider_uid: Option<String>) -> Result<Self, ValidationErrors> {
+    pub async fn new(
+        name: String,
+        email: String,
+        password: Option<String>,
+        provider: String,
+        provider_uid: Option<String>,
+    ) -> Result<Self, ValidationErrors> {
         let mut hashed_password: Option<String> = Some(String::new());
         if let Some(password) = password.clone() {
-            hashed_password = Some(Self::hash_password(password).await
-                .expect("Cannot hash the password"));
+            hashed_password = Some(
+                Self::hash_password(password)
+                    .await
+                    .expect("Cannot hash the password"),
+            );
         }
         let mut user = User {
             id: Uuid::new_v4(),
@@ -64,16 +81,15 @@ impl User {
         };
         let validate = user.validate();
         if validate.is_err() {
-            return Err(validate.err().unwrap())
+            return Err(validate.err().unwrap());
         }
-        user.password  = hashed_password;
+        user.password = hashed_password;
         Ok(user)
-
     }
-    pub async fn insert_new_user(self) -> Result<(), types::Status> {
+    pub async fn insert_new_user(self) -> Result<(), AuthStatus> {
         let db = get_postgres_conn();
-        let email= self.email.clone();
-        let user =  UserActiveModel{
+        let email = self.email.clone();
+        let user = UserActiveModel {
             id: Set(self.id),
             name: Set(self.name),
             email: Set(self.email),
@@ -83,25 +99,25 @@ impl User {
             registerdate: Set(Some(DateTime::from(Utc::now()))),
             role: Set(self.role),
         };
-        if let Err(e) = user.insert(&db.await).await{
+        if let Err(e) = user.insert(&db.await).await {
             if e.to_string().contains("users_email_key") {
                 error!("Duplicate email error: {}", email);
-                return Err(types::Status::DuplicateEmail)
+                return Err(AuthStatus::DuplicateEmail);
             }
 
-            return Err(types::Status::InternalError)
+            return Err(AuthStatus::InternalError);
         }
         Ok(())
     }
 
-    pub async fn find_by_email(email:&String) -> Option<Self>{
+    pub async fn find_by_email(email: &String) -> Option<Self> {
         let time = Instant::now();
         let conn = get_postgres_conn();
         let user_db = UserEntity::find()
             .filter(crate::entity::users::Column::Email.contains(email))
-            .all(&conn.await).
-            await;
-        if let Ok(user_db) = user_db{
+            .all(&conn.await)
+            .await;
+        if let Ok(user_db) = user_db {
             if user_db.is_empty() {
                 debug!("Time to fetch user {}", time.elapsed().as_millis());
                 return None;
@@ -112,16 +128,15 @@ impl User {
         debug!("Failed to fetch user in {}", time.elapsed().as_millis());
         None
     }
-        
 
-    pub async fn find_by_id(uid: &String) -> Option<Self>{
+    pub async fn find_by_id(uid: &String) -> Option<Self> {
         let time = Instant::now();
         let conn = get_postgres_conn();
         let user_db = UserEntity::find()
             .filter(crate::entity::users::Column::Id.eq(uid))
-            .all(&conn.await).
-            await;
-        if let Ok(user_db) = user_db{
+            .all(&conn.await)
+            .await;
+        if let Ok(user_db) = user_db {
             if user_db.is_empty() {
                 debug!("Time to fetch user {}", time.elapsed().as_millis());
                 return None;
@@ -132,34 +147,33 @@ impl User {
         debug!("Failed to fetch user in {}", time.elapsed().as_millis());
         None
     }
-    async fn hash_password(password: String) -> Result<String, password_hash::Error>{
+    async fn hash_password(password: String) -> Result<String, password_hash::Error> {
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
-        match argon2.hash_password(password.as_bytes(), &salt){
-            Ok(hashed_password) => { Ok(hashed_password.to_string()) }
-            Err(e) => Err(e)
+        match argon2.hash_password(password.as_bytes(), &salt) {
+            Ok(hashed_password) => Ok(hashed_password.to_string()),
+            Err(e) => Err(e),
         }
     }
-    pub async fn verify_password(&self, password: &str) -> bool{
+    pub async fn verify_password(&self, password: &str) -> bool {
         if let Some(password_db) = self.password.clone() {
-            return match PasswordHash::new(&password_db){
-                Ok(hashed_password) => {
-                    Argon2::default().verify_password(password.as_bytes(), &hashed_password).is_ok()
-                }
+            return match PasswordHash::new(&password_db) {
+                Ok(hashed_password) => Argon2::default()
+                    .verify_password(password.as_bytes(), &hashed_password)
+                    .is_ok(),
                 Err(e) => {
                     error!("Cannot verify password: {}", e);
                     false
                 }
-            }
+            };
         }
         false
     }
-
 }
 
 impl Into<User> for UserActiveModel {
     fn into(self) -> User {
-        User{
+        User {
             id: self.id.unwrap(),
             name: self.name.unwrap(),
             email: self.email.unwrap(),
@@ -167,14 +181,14 @@ impl Into<User> for UserActiveModel {
             provider: self.provider.unwrap(),
             provider_uid: self.provideruid.unwrap(),
             register_date: self.registerdate.unwrap(),
-            role: self.role.unwrap()
+            role: self.role.unwrap(),
         }
     }
 }
 
 impl Into<User> for UserModel {
     fn into(self) -> User {
-        User{
+        User {
             id: self.id,
             name: self.name,
             email: self.email,
@@ -182,14 +196,14 @@ impl Into<User> for UserModel {
             provider: self.provider,
             provider_uid: self.provideruid,
             register_date: self.registerdate,
-            role: self.role
+            role: self.role,
         }
     }
 }
 
-impl Into<UserActiveModel> for User{
+impl Into<UserActiveModel> for User {
     fn into(self) -> UserActiveModel {
-        UserActiveModel{
+        UserActiveModel {
             id: Set(self.id),
             name: Set(self.name),
             email: Set(self.email),
@@ -204,7 +218,7 @@ impl Into<UserActiveModel> for User{
 
 fn validate_password(value: &&String) -> Result<(), ValidationError> {
     let time = Instant::now();
-    if STRONG_PASSWORD.matching(value).count() == 5{
+    if STRONG_PASSWORD.matching(value).count() == 5 {
         info!("Time to parse {}", time.elapsed().as_millis());
         return Ok(());
     }

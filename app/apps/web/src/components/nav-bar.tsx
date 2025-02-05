@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { getDashboardUrl } from "@/lib/utils";
 
 const getInitials = (name: string | null | undefined) => {
   if (!name) return "U";
@@ -59,6 +60,14 @@ export const NavBar = () => {
               />
             </Link>
             <div className="hidden items-center gap-8 md:flex">
+              {session?.user && (
+                <Link
+                  href={getDashboardUrl(session.user.role)}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Dashboard
+                </Link>
+              )}
               <Link
                 href="/faq"
                 prefetch
@@ -115,6 +124,14 @@ export const NavBar = () => {
                       {session.user.email}
                     </p>
                   </div>
+                  <DropdownMenuItem
+                    className="gap-2"
+                    onClick={() =>
+                      router.push(getDashboardUrl(session.user.role))
+                    }
+                  >
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="gap-2"
                     onClick={() => signOut({ callbackUrl: "/" })}

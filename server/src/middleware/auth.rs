@@ -1,14 +1,14 @@
+use crate::model::credentials::{AccessTokenClaims, RefreshTokenClaims};
 use actix_web::{
-    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    error::ErrorUnauthorized,
-    Error,
+  dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
+  error::ErrorUnauthorized,
+  Error,
 };
-use futures::future::{ready, Ready};
-use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
 use futures::future::LocalBoxFuture;
+use futures::future::{ready, Ready};
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use tokio::time::Instant;
 use tracing::log::info;
-use crate::model::credentials::{AccessTokenClaims, RefreshTokenClaims};
 
 #[derive(Clone)]
 pub struct JwtMiddleware {
@@ -72,9 +72,9 @@ where
                 }
             }
             None => {
-                return Box::pin(async move {
-                    Err(ErrorUnauthorized("Missing authorization header"))
-                });
+                return Box::pin(
+                    async move { Err(ErrorUnauthorized("Missing authorization header")) },
+                );
             }
         };
 

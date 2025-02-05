@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MagicCard } from "./ui/magic-card";
 
 interface CounterProps {
   end: number;
@@ -48,28 +49,51 @@ export const StatsSection = () => {
 
       <div className="container px-4">
         <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
-          <div className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/50">
+          <MagicCard
+            className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+            gradientFrom="#3B82F6"
+            gradientTo="#8B5CF6"
+            gradientColor="rgb(var(shadow-primary))"
+          >
             <Counter end={50000} suffix="+" />
             <p className="mt-2 text-sm text-muted-foreground">Happy Patients</p>
-          </div>
-          <div className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/50">
+          </MagicCard>
+
+          <MagicCard
+            className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+            gradientFrom="#8B5CF6"
+            gradientTo="#EC4899"
+            gradientColor="rgb(var(shadow-primary))"
+          >
             <Counter end={1000} suffix="+" />
             <p className="mt-2 text-sm text-muted-foreground">
               Healthcare Providers
             </p>
-          </div>
-          <div className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/50">
+          </MagicCard>
+
+          <MagicCard
+            className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+            gradientFrom="#10B981"
+            gradientTo="#3B82F6"
+            gradientColor="rgb(var(shadow-primary))"
+          >
             <Counter end={98} suffix="%" />
             <p className="mt-2 text-sm text-muted-foreground">
               Satisfaction Rate
             </p>
-          </div>
-          <div className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/50">
+          </MagicCard>
+
+          <MagicCard
+            className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+            gradientFrom="#F59E0B"
+            gradientTo="#8B5CF6"
+            gradientColor="rgb(var(shadow-primary))"
+          >
             <Counter end={24} prefix="24/" />
             <p className="mt-2 text-sm text-muted-foreground">
               Support Available
             </p>
-          </div>
+          </MagicCard>
         </div>
       </div>
     </div>

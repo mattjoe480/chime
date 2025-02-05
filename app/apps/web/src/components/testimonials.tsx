@@ -2,27 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { TbQuote, TbChevronLeft, TbChevronRight } from "react-icons/tb";
-import Image from "next/image";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
     name: "Sarah Johnson",
     role: "Patient",
-    image: "https://i.pravatar.cc/100?img=1",
     content:
       "Chime has transformed how I manage my healthcare. The ease of scheduling appointments and accessing my records is incredible.",
   },
   {
     name: "Dr. Michael Chen",
     role: "Healthcare Provider",
-    image: "https://i.pravatar.cc/100?img=2",
     content:
       "As a healthcare provider, Chime helps me stay connected with my patients and manage my practice more efficiently.",
   },
   {
     name: "Emily Rodriguez",
     role: "Patient",
-    image: "https://i.pravatar.cc/100?img=3",
     content:
       "The AI health assistant is like having a knowledgeable friend available 24/7. It's helped me make better health decisions.",
   },
@@ -75,14 +72,11 @@ export const TestimonialsSection = () => {
                   {testimonials[current].content}
                 </p>
                 <div className="flex items-center gap-4">
-                  <div className="relative h-12 w-12">
-                    <Image
-                      src={testimonials[current].image}
-                      alt={testimonials[current].name}
-                      fill
-                      className="rounded-full object-cover"
-                    />
-                  </div>
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {testimonials[current].name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <h3 className="font-semibold">
                       {testimonials[current].name}

@@ -5,6 +5,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ReactNode } from "react";
 import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { Toaster } from "@/components/ui/toaster";
+import { MainLayout } from "@/components/main-layout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -86,9 +89,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <MainLayout>{children}</MainLayout>
+          </SessionProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
+      <GoogleAnalytics gaId="G-QHK3REEFCM" />
     </html>
   );
 }

@@ -1,13 +1,13 @@
 #![feature(duration_constructors)]
 #![feature(async_closure)]
 
-mod db;
 mod controllers;
-mod middleware;
-mod rpc;
-pub mod model;
-mod types;
+mod db;
 mod entity;
+mod middleware;
+pub mod model;
+mod rpc;
+mod types;
 use crate::controllers::initialize::{get_jwt_secret_key, initialize_all};
 use crate::controllers::login::login_controller;
 use crate::rpc::events::metrics_handler;
@@ -38,20 +38,20 @@ async fn main() -> std::io::Result<()> {
     initialize_all().await;
     get_jwt_secret_key().await;
     Grpc::build();
-    let server_uri = env::var("SERVER_URL").expect("SERVER_URL environment variable not set"); 
+    let server_uri = env::var("SERVER_URL").expect("SERVER_URL environment variable not set");
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
-            .service(web::scope("/api")
-                .service(web::scope("/v1")
-                    .service(web::scope("/auth")
-                        .route("/login", web::get().to(login_controller))
-                )
-            ))
+            .service(
+                web::scope("/api").service(
+                    web::scope("/v1").service(
+                        web::scope("/auth").route("/login", web::get().to(login_controller)),
+                    ),
+                ),
+            )
             .route("/metrics", web::get().to(metrics_handler))
     })
-        .bind(server_uri)?
-        .run()
-        .await
-
+    .bind(server_uri)?
+    .run()
+    .await
 }

@@ -3,6 +3,22 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "doctor_specialization"
+)]
+pub enum DoctorSpecialization {
+    #[sea_orm(string_value = "general")]
+    General,
+    #[sea_orm(string_value = "cardiology")]
+    Cardiology,
+    #[sea_orm(string_value = "pediatrics")]
+    Pediatrics,
+    #[sea_orm(string_value = "orthopedics")]
+    Orthopedics,
+}
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Deserialize, Serialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "role")]
 pub enum Role {
@@ -12,4 +28,14 @@ pub enum Role {
     User,
     #[sea_orm(string_value = "mod")]
     Mod,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Deserialize, Serialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "usertype")]
+pub enum Usertype {
+    #[sea_orm(string_value = "admin")]
+    Admin,
+    #[sea_orm(string_value = "patient")]
+    Patient,
+    #[sea_orm(string_value = "doctor")]
+    Doctor,
 }

@@ -8,9 +8,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     tonic_build::configure()
         .out_dir(&type_dir)
         .file_descriptor_set_path(out_dir.join("server_descriptor.bin"))
-        .compile_protos(&["proto/ping.proto", "proto/events.proto", "proto/auth.proto"], &["proto/"])?;
+        .compile_protos(&["proto/ping.proto", "proto/events.proto", "proto/auth.proto", "proto/onboarding.proto"], &["proto/"])?;
     tonic_build::compile_protos("proto/events.proto")?;
     tonic_build::compile_protos("proto/ping.proto")?;
     tonic_build::compile_protos("proto/auth.proto")?;
+    tonic_build::compile_protos("proto/onboarding.proto")?;
     Ok(())
+
 }

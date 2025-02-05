@@ -1,25 +1,25 @@
+use crate::db::pending_message::PendingMessage;
+use crate::rpc::events::ClientManager;
+use crate::types::events::events::Event;
+use crate::types::{Events, MessageCommand, MessageEvent};
 use tokio::sync::mpsc::Sender;
 use tonic::{Code, Status};
 use tracing::info;
-use crate::db::pending_message::PendingMessage;
-use crate::types::events::events::Event;
-use crate::types::{Events, MessageCommand, MessageEvent};
-use crate::rpc::events::ClientManager;
 
-impl MessageEvent{
-    pub async fn on_new_message(&self) -> Result<Event, Status>{ 
+impl MessageEvent {
+    pub async fn on_new_message(&self) -> Result<Event, Status> {
         info!("Message {:?}", self); //TODO impl message functions
         if let Ok(cmd) = MessageCommand::try_from(self.command) {
-             self.invoke_cmd(cmd).await
-        }else { 
+            self.invoke_cmd(cmd).await
+        } else {
             Err(Status::new(Code::InvalidArgument, "Unknown command"))
         }
     }
-    pub async fn invoke_cmd(&self, cmd: MessageCommand) -> Result<Event, Status>{
+    pub async fn invoke_cmd(&self, cmd: MessageCommand) -> Result<Event, Status> {
         match cmd {
             MessageCommand::MessageSend => {
                 MessageEventService::store(self).await;
-                MessageEvent::internal_error("MessageSend not implemented yet") 
+                MessageEvent::internal_error("MessageSend not implemented yet")
             }
             MessageCommand::MessageReceive => {
                 MessageEvent::internal_error("MessageReceive not implemented yet")
@@ -68,7 +68,7 @@ impl MessageEvent{
             }
         }
     }
-    
+
     fn internal_error(msg: &str) -> Result<Event, Status> {
         Err(Status::new(Code::Internal, msg))
     }
@@ -77,24 +77,27 @@ impl MessageEvent{
 pub struct MessageEventService;
 
 impl MessageEventService {
-    pub async fn store(event: &MessageEvent){
+    pub async fn store(event: &MessageEvent) {
         let mut remaining_dst = event.dst_uids.clone();
         ClientManager::broadcast_message(&mut remaining_dst, event.clone()).await;
         for dst in &remaining_dst {
             info!("Message needs to be sent to {}", dst);
         }
         PendingMessage::send(remaining_dst, &event.clone().into())
-            .await.expect("Error: Cannot send event to pending message");
+            .await
+            .expect("Error: Cannot send event to pending message");
     }
-    
-    pub async fn send_pending(uid: &str, tx: Sender<Result<Events, Status>>)->Result<(), ()>{
-        let msgs = PendingMessage::fetch(String::from(uid)).await.expect("Error: Cannot fetch pending message");
+
+    pub async fn send_pending(uid: &str, tx: Sender<Result<Events, Status>>) -> Result<(), ()> {
+        let msgs = PendingMessage::fetch(String::from(uid))
+            .await
+            .expect("Error: Cannot fetch pending message");
         for msg in msgs {
-            let event = Events{
+            let event = Events {
                 event: Some(Event::MessageEvent(msg.into())),
             };
-            if let Err (e) = tx.send(Ok(event)).await {
-                return Err(())
+            if let Err(e) = tx.send(Ok(event)).await {
+                return Err(());
             }
         }
         Ok(())

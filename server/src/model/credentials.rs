@@ -1,21 +1,22 @@
-use std::collections::HashSet;
+use crate::controllers::initialize::get_redis_conn;
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
-use serde::{Deserialize, Serialize};
-use std::env;
 use lazy_static::lazy_static;
 use redis::{Commands, RedisError, RedisResult};
+use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
+use std::env;
 use tracing::{debug, error};
-use crate::controllers::initialize::get_redis_conn;
 
-lazy_static!{
+lazy_static! {
     static ref secret: String = env::var("JWT_KEY").expect("JWT_KEY must be set!!!");
-    static ref refresh_secret: String = env::var("JWT_REFRESH_KEY").expect("JWT_KEY must be set!!!");
+    static ref refresh_secret: String =
+        env::var("JWT_REFRESH_KEY").expect("JWT_KEY must be set!!!");
     static ref jwt_ttl: String = env::var("JWT_TTL").unwrap_or("60".to_string());
     static ref jwt_refresh_ttl: String = env::var("JWT_REFRESH_TTL").unwrap_or("720".to_string());
 }
 
-#[derive(Serialize, Deserialize, Debug )]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct AccessTokenClaims {
     pub(crate) sub: String,
     roles: Vec<String>,
@@ -36,10 +37,12 @@ impl JwtToken for AccessTokenClaims {}
 impl JwtToken for RefreshTokenClaims {}
 
 impl AccessTokenClaims {
-    pub async fn new(uid: &str)->Self{
-        let ttl = env::var("JWT_TTL").expect("JWT_TTL must be set!!!")
-            .parse::<i64>().unwrap();
-        Self{ 
+    pub async fn new(uid: &str) -> Self {
+        let ttl = env::var("JWT_TTL")
+            .expect("JWT_TTL must be set!!!")
+            .parse::<i64>()
+            .unwrap();
+        Self {
             sub: uid.to_string(),
             roles: vec!["user".to_string()],
             exp: (Utc::now() + Duration::minutes(ttl)).timestamp() as usize,
@@ -57,35 +60,42 @@ impl AccessTokenClaims {
     }
     pub(crate) fn from_jwt(jwt: String) -> Result<AccessTokenClaims, bool> {
         debug!("jwt: {}", jwt);
-        if let Ok(claims) = AccessTokenClaims::decode_claims(&jwt, &secret.to_string()){
+        if let Ok(claims) = AccessTokenClaims::decode_claims(&jwt, &secret.to_string()) {
             Ok(claims.claims)
         } else {
             Err(false)
         }
     }
     pub(crate) async fn fetch(uid: &str) -> Option<String> {
-        let res = AccessTokenClaims::get(&format!("access_token:{}", uid)).await; 
+        let res = AccessTokenClaims::get(&format!("access_token:{}", uid)).await;
         if res.is_ok() {
             let data: String = res.unwrap();
             return Some(data);
         }
         None
     }
-    pub async fn set(&self) -> bool{
-        if AccessTokenClaims::store(self, &format!("access_token:{}", &self.sub), (self.exp - self.iat) as u64).await.is_ok(){
+    pub async fn set(&self) -> bool {
+        if AccessTokenClaims::store(
+            self,
+            &format!("access_token:{}", &self.sub),
+            (self.exp - self.iat) as u64,
+        )
+        .await
+        .is_ok()
+        {
             true
-        }
-        else {
+        } else {
             false
         }
     }
-    
 }
 
 impl RefreshTokenClaims {
     pub async fn new(uid: &str) -> Self {
-        let ttl = env::var("JWT_TTL").expect("JWT_TTL must be set!!!")
-            .parse::<i64>().unwrap();
+        let ttl = env::var("JWT_TTL")
+            .expect("JWT_TTL must be set!!!")
+            .parse::<i64>()
+            .unwrap();
         Self {
             sub: uid.to_string(),
             exp: (Utc::now() + Duration::hours(ttl)).timestamp() as usize,
@@ -115,47 +125,71 @@ impl RefreshTokenClaims {
         None
     }
     pub async fn set(&self) -> bool {
-        if RefreshTokenClaims::store(self, &format!("refresh_token{}", &self.sub), (self.exp - self.iat) as u64).await.is_ok() {
+        if RefreshTokenClaims::store(
+            self,
+            &format!("refresh_token{}", &self.sub),
+            (self.exp - self.iat) as u64,
+        )
+        .await
+        .is_ok()
+        {
             true
         } else {
             false
         }
     }
-    pub async fn revoke(&self) -> bool{
-        if RefreshTokenClaims::store(&self, &format!("blocked_refresh_token{}", &self.jwt_token().unwrap()), (self.exp - self.iat) as u64).await.is_ok() {
+    pub async fn revoke(&self) -> bool {
+        if RefreshTokenClaims::store(
+            &self,
+            &format!("blocked_refresh_token{}", &self.jwt_token().unwrap()),
+            (self.exp - self.iat) as u64,
+        )
+        .await
+        .is_ok()
+        {
             true
         } else {
             false
         }
     }
-    pub async fn is_revoke(&self) -> bool{
-        if RefreshTokenClaims::get(&format!("blocked_refresh_token{}", &self.jwt_token().unwrap())).await.is_ok() {
+    pub async fn is_revoke(&self) -> bool {
+        if RefreshTokenClaims::get(&format!(
+            "blocked_refresh_token{}",
+            &self.jwt_token().unwrap()
+        ))
+        .await
+        .is_ok()
+        {
             true
         } else {
             false
         }
     }
-    
-    
 }
-
-
 
 #[tonic::async_trait]
 pub trait JwtToken: Serialize + for<'de> Deserialize<'de> {
-    fn encode_claims(claims: &Self, token_secret: &str) -> jsonwebtoken::errors::Result<String>{
+    fn encode_claims(claims: &Self, token_secret: &str) -> jsonwebtoken::errors::Result<String> {
         let header = Header::new(jsonwebtoken::Algorithm::HS256);
         let encoding_key = EncodingKey::from_secret(token_secret.as_bytes());
         encode(&header, claims, &encoding_key)
     }
-    fn decode_claims(token: &str, token_secret: &str) -> jsonwebtoken::errors::Result<TokenData<Self>> {
+    fn decode_claims(
+        token: &str,
+        token_secret: &str,
+    ) -> jsonwebtoken::errors::Result<TokenData<Self>> {
         let decoding_key = DecodingKey::from_secret(token_secret.as_bytes());
         let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
         validation.aud = Some(HashSet::from(["localhost".to_string()]));
         decode::<Self>(token, &decoding_key, &validation)
     }
     async fn store(&self, key: &str, duration: u64) -> Result<(), RedisError> {
-        if let Err(e) = get_redis_conn().await.as_mut().unwrap().set_ex::<&str, &str, String>(key, &serde_json::to_string(self).unwrap(), duration) {
+        if let Err(e) = get_redis_conn()
+            .await
+            .as_mut()
+            .unwrap()
+            .set_ex::<&str, &str, String>(key, &serde_json::to_string(self).unwrap(), duration)
+        {
             error!("Refresh token revocation error: {}", e);
             Err(e)
         } else {
@@ -163,6 +197,10 @@ pub trait JwtToken: Serialize + for<'de> Deserialize<'de> {
         }
     }
     async fn get(key: &str) -> RedisResult<String> {
-        get_redis_conn().await.as_mut().unwrap().get::<&str, String>(key)
+        get_redis_conn()
+            .await
+            .as_mut()
+            .unwrap()
+            .get::<&str, String>(key)
     }
 }

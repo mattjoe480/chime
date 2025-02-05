@@ -8,8 +8,8 @@ enum Status {
   AUTH_SUCCESS = 0;
   AUTH_FAILED = 1;
   INVALID_CREDENTIALS = 2;
-  EXPIRED_TOKEN = 3;          
-  ACCOUNT_LOCKED = 4;         
+  EXPIRED_TOKEN = 3;
+  ACCOUNT_LOCKED = 4;
   USER_NOT_FOUND = 5;
   MFA_REQUIRED = 6;
   MFA_FAILED = 7;
@@ -19,6 +19,7 @@ enum Status {
   INVALID_PROVIDER = 11;
   INTERNAL_ERROR = 12;
   INVALID_EMAIL = 13;
+  OK = 14;
 }
 
 enum AuthProvider {
@@ -36,15 +37,15 @@ message OAuth {
 
 message Token {
   string uid = 1;
-  string email = 2;                      
-  string access_token = 3;               
-  string refresh_token = 4;              
-  Status status = 5;                     
-  string error_message = 6;              
-  google.protobuf.Timestamp access_token_expiration = 7;  
-  google.protobuf.Timestamp refresh_token_expiration = 8; 
-  bool mfa_required = 9;                
-  google.protobuf.Timestamp last_login = 10;  
+  string email = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  Status status = 5;
+  string error_message = 6;
+  google.protobuf.Timestamp access_token_expiration = 7;
+  google.protobuf.Timestamp refresh_token_expiration = 8;
+  bool mfa_required = 9;
+  google.protobuf.Timestamp last_login = 10;
   string role = 11;
 }
 
@@ -93,9 +94,32 @@ message RegisterStatus{
   Status status = 1;
 }
 
+message RoleRequest{
+  string email = 1;
+}
+message RoleResponse{
+  string role = 1;
+}
+
+enum Roles{
+  PATIENT = 0;
+  DOCTOR = 1;
+}
+
+message CreateRoleRequest{
+  string email = 1;
+  Roles role = 2;
+}
+
+message CreateRoleResponse{
+  Status status = 1;
+}
+
 service auth{
   rpc auth(AuthRequest) returns (Token);
   rpc token(RefreshToken) returns(AuthToken);
   rpc revoke(RefreshToken) returns(Revoke);
   rpc register(User) returns(RegisterStatus);
+  rpc role(RoleRequest) returns(RoleResponse);
+  rpc createRole(CreateRoleRequest) returns(CreateRoleResponse);
 }

@@ -108,6 +108,28 @@ pub struct RegisterStatus {
     #[prost(enumeration = "Status", tag = "1")]
     pub status: i32,
 }
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RoleRequest {
+    #[prost(string, tag = "1")]
+    pub email: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RoleResponse {
+    #[prost(string, tag = "1")]
+    pub role: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateRoleRequest {
+    #[prost(string, tag = "1")]
+    pub email: ::prost::alloc::string::String,
+    #[prost(enumeration = "Roles", tag = "2")]
+    pub role: i32,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct CreateRoleResponse {
+    #[prost(enumeration = "Status", tag = "1")]
+    pub status: i32,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum Status {
@@ -125,6 +147,7 @@ pub enum Status {
     InvalidProvider = 11,
     InternalError = 12,
     InvalidEmail = 13,
+    Ok = 14,
 }
 impl Status {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -147,6 +170,7 @@ impl Status {
             Self::InvalidProvider => "INVALID_PROVIDER",
             Self::InternalError => "INTERNAL_ERROR",
             Self::InvalidEmail => "INVALID_EMAIL",
+            Self::Ok => "OK",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -166,6 +190,7 @@ impl Status {
             "INVALID_PROVIDER" => Some(Self::InvalidProvider),
             "INTERNAL_ERROR" => Some(Self::InternalError),
             "INVALID_EMAIL" => Some(Self::InvalidEmail),
+            "OK" => Some(Self::Ok),
             _ => None,
         }
     }
@@ -195,6 +220,32 @@ impl AuthProvider {
             "GOOGLE" => Some(Self::Google),
             "FACEBOOK" => Some(Self::Facebook),
             "GITHUB" => Some(Self::Github),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum Roles {
+    Patient = 0,
+    Doctor = 1,
+}
+impl Roles {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::Patient => "PATIENT",
+            Self::Doctor => "DOCTOR",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "PATIENT" => Some(Self::Patient),
+            "DOCTOR" => Some(Self::Doctor),
             _ => None,
         }
     }
@@ -362,6 +413,45 @@ pub mod auth_client {
             req.extensions_mut().insert(GrpcMethod::new("auth.auth", "register"));
             self.inner.unary(req, path, codec).await
         }
+        pub async fn role(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RoleRequest>,
+        ) -> std::result::Result<tonic::Response<super::RoleResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static("/auth.auth/role");
+            let mut req = request.into_request();
+            req.extensions_mut().insert(GrpcMethod::new("auth.auth", "role"));
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn create_role(
+            &mut self,
+            request: impl tonic::IntoRequest<super::CreateRoleRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::CreateRoleResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static("/auth.auth/createRole");
+            let mut req = request.into_request();
+            req.extensions_mut().insert(GrpcMethod::new("auth.auth", "createRole"));
+            self.inner.unary(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -393,6 +483,17 @@ pub mod auth_server {
             &self,
             request: tonic::Request<super::User>,
         ) -> std::result::Result<tonic::Response<super::RegisterStatus>, tonic::Status>;
+        async fn role(
+            &self,
+            request: tonic::Request<super::RoleRequest>,
+        ) -> std::result::Result<tonic::Response<super::RoleResponse>, tonic::Status>;
+        async fn create_role(
+            &self,
+            request: tonic::Request<super::CreateRoleRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::CreateRoleResponse>,
+            tonic::Status,
+        >;
     }
     #[derive(Debug)]
     pub struct AuthServer<T> {
@@ -627,6 +728,92 @@ pub mod auth_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = registerSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.auth/role" => {
+                    #[allow(non_camel_case_types)]
+                    struct roleSvc<T: Auth>(pub Arc<T>);
+                    impl<T: Auth> tonic::server::UnaryService<super::RoleRequest>
+                    for roleSvc<T> {
+                        type Response = super::RoleResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::RoleRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Auth>::role(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = roleSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.auth/createRole" => {
+                    #[allow(non_camel_case_types)]
+                    struct createRoleSvc<T: Auth>(pub Arc<T>);
+                    impl<T: Auth> tonic::server::UnaryService<super::CreateRoleRequest>
+                    for createRoleSvc<T> {
+                        type Response = super::CreateRoleResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::CreateRoleRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Auth>::create_role(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = createRoleSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

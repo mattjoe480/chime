@@ -1,32 +1,35 @@
+use crate::model::credentials::AccessTokenClaims;
+use crate::rpc::message::MessageEventService;
+use crate::rpc::{CLIENT_MANAGER, EVENT_REQUESTS_TOTAL, EVENT_REQUEST_DURATION};
+use crate::types::chat_server::Chat;
+use crate::types::events::events::Event;
+use crate::types::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
+use actix_web::Responder;
 use prometheus::core::Collector;
+use prometheus::proto::MetricFamily;
+use prometheus::{Encoder, TextEncoder};
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
-use actix_web::Responder;
-use prometheus::{Encoder, TextEncoder};
-use prometheus::proto::MetricFamily;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::{Stream, StreamExt};
 use tonic::{Request, Response, Status, Streaming};
 use tracing::info;
-use crate::model::credentials::AccessTokenClaims;
-use crate::types::chat_server::Chat;
-use crate::types::{Events, MessageCommand, MessageEvent, SuccessCode, SuccessEvent};
-use crate::types::events::events::Event;
-use crate::rpc::{CLIENT_MANAGER, EVENT_REQUESTS_TOTAL, EVENT_REQUEST_DURATION};
-use crate::rpc::message::MessageEventService;
 
 pub struct ChatServerImpl;
-
 
 #[tonic::async_trait]
 impl Chat for ChatServerImpl {
     type MessageServiceStream = Pin<Box<dyn Stream<Item = Result<Events, Status>> + Send>>;
 
-    async fn message_service(&self, request: Request<Streaming<Events>>) -> Result<Response<Self::MessageServiceStream>, Status> {
-
-        let bearer = request.metadata().get("authorization")
+    async fn message_service(
+        &self,
+        request: Request<Streaming<Events>>,
+    ) -> Result<Response<Self::MessageServiceStream>, Status> {
+        let bearer = request
+            .metadata()
+            .get("authorization")
             .unwrap()
             .to_str()
             .unwrap();
@@ -37,7 +40,8 @@ impl Chat for ChatServerImpl {
         CLIENT_MANAGER.insert_client(uid.clone(), tx.clone()).await;
         tokio::spawn(async move {
             MessageEventService::send_pending(&uid, tx.clone())
-                .await.expect("Cannot send pending message");
+                .await
+                .expect("Cannot send pending message");
             EVENT_REQUESTS_TOTAL.inc();
             let timer = EVENT_REQUEST_DURATION
                 .with_label_values(&["stream_data"])
@@ -49,14 +53,12 @@ impl Chat for ChatServerImpl {
                             ClientManager::broadcast_message(&mut msg.dst_uids.clone(), msg).await;
                         }
                         if let Ok(event) = ChatServerImpl::handle(&events).await {
-                            tx.send(Ok(
-                                Events{ event: Some(event) }
-                            )).await.unwrap();
+                            tx.send(Ok(Events { event: Some(event) })).await.unwrap();
                         }
                     }
                     Err(_) => {
                         break;
-                    }, 
+                    }
                 }
             }
             CLIENT_MANAGER.remove_client(uid.parse().unwrap());
@@ -71,7 +73,7 @@ impl Chat for ChatServerImpl {
 
 impl ChatServerImpl {
     async fn handle(events: &Events) -> Result<Event, Status> {
-        if let Some(events) = &events.event{
+        if let Some(events) = &events.event {
             match events {
                 Event::MessageEvent(message) => {
                     return message.on_new_message().await;
@@ -85,7 +87,6 @@ impl ChatServerImpl {
         };
         todo!()
     }
-   
 }
 
 pub struct ClientManager {
@@ -95,17 +96,16 @@ pub struct ClientManager {
 impl ClientManager {
     async fn insert_client(&self, client_id: String, sender: mpsc::Sender<Result<Events, Status>>) {
         info!("Registering user {}", client_id);
-        sender.send(
-            Ok(
-                Events{ event: Some(Event::SuccessEvent(
-                    SuccessEvent{
-                        event_uid: "1".to_string(),
-                        success_code: SuccessCode::SessionEstablished.into(),
-                        description: "Connection established successfully".to_string(),
-                    }
-                ))}
-            )
-        ).await.unwrap();
+        sender
+            .send(Ok(Events {
+                event: Some(Event::SuccessEvent(SuccessEvent {
+                    event_uid: "1".to_string(),
+                    success_code: SuccessCode::SessionEstablished.into(),
+                    description: "Connection established successfully".to_string(),
+                })),
+            }))
+            .await
+            .unwrap();
         let mut clients = self.clients.lock().unwrap();
         clients.insert(client_id, sender);
     }
@@ -124,22 +124,18 @@ impl ClientManager {
         }
     }
     pub async fn broadcast_message(dst: &mut Vec<String>, msg: MessageEvent) {
-
         let clients = CLIENT_MANAGER.get_clients();
         let loop_counter = dst.clone().into_iter().enumerate();
         for (index, client) in loop_counter {
             if let Some(sender) = clients.get(&client) {
                 let mut msg = msg.clone();
                 msg.command = MessageCommand::MessageReceive.into();
-                let res = sender.send(
-                    Ok(
-                        Events{
-                            event: 
-                            Some(Event::MessageEvent(msg))
-                        }
-                    )
-                ).await;
-                if res.is_ok() { 
+                let res = sender
+                    .send(Ok(Events {
+                        event: Some(Event::MessageEvent(msg)),
+                    }))
+                    .await;
+                if res.is_ok() {
                     dst.remove(index);
                 }
             }
@@ -149,8 +145,8 @@ impl ClientManager {
 pub async fn metrics_handler() -> impl Responder {
     // Create an encoder for Prometheus text format
     let encoder = TextEncoder::new();
-    let mut metric_families: Vec<MetricFamily> = Vec::new() ;  // Collect all registered metrics
-    for i in EVENT_REQUESTS_TOTAL.collect(){
+    let mut metric_families: Vec<MetricFamily> = Vec::new(); // Collect all registered metrics
+    for i in EVENT_REQUESTS_TOTAL.collect() {
         metric_families.push(i);
     }
     for i in EVENT_REQUEST_DURATION.collect() {
@@ -158,7 +154,7 @@ pub async fn metrics_handler() -> impl Responder {
     }
 
     let mut buffer = Vec::new();
-    if encoder.encode(&metric_families, &mut buffer).is_err(){
+    if encoder.encode(&metric_families, &mut buffer).is_err() {
         return actix_web::HttpResponse::NoContent().finish();
     }
     actix_web::HttpResponse::Ok()

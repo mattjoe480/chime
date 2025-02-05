@@ -32,7 +32,8 @@ import { StatsSection } from "@/components/counter-stats";
 import { TestimonialsSection } from "@/components/testimonials";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import  ScrollProgress from "@/components/ui/scroll-progress";
+import ScrollProgress from "@/components/ui/scroll-progress";
+import { ShineBorder } from "@/components/ui/shine-border";
 
 const FAQSection = () => {
   return (
@@ -274,8 +275,11 @@ const Home = () => {
 
                 <section className="mb-24">
                   <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    <MagicCard>
-                      <Card className="group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+                    <ShineBorder
+                      className="pointer-events-none bg-gradient-to-b from-primary/80 to-primary/20 bg-clip-text text-transparent p-[1px]"
+                      color={["#3B82F6", "#10B981", "#8B5CF6"]}
+                    >
+                      <Card className="h-full w-full group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <CardHeader className="relative backdrop-blur-sm">
                           <CardTitle className="flex items-center gap-2">
@@ -290,10 +294,13 @@ const Home = () => {
                           </CardDescription>
                         </CardHeader>
                       </Card>
-                    </MagicCard>
+                    </ShineBorder>
 
-                    <MagicCard>
-                      <Card className="group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+                    <ShineBorder
+                      className="pointer-events-none bg-gradient-to-b from-primary/80 to-primary/20 bg-clip-text text-transparent p-[1px]"
+                      color={["#06B6D4", "#8B5CF6", "#F59E0B"]}
+                    >
+                      <Card className="h-full w-full group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <CardHeader className="relative backdrop-blur-sm">
                           <CardTitle className="flex items-center gap-2">
@@ -308,10 +315,13 @@ const Home = () => {
                           </CardDescription>
                         </CardHeader>
                       </Card>
-                    </MagicCard>
+                    </ShineBorder>
 
-                    <MagicCard>
-                      <Card className="group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+                    <ShineBorder
+                      className="pointer-events-none bg-gradient-to-b from-primary/80 to-primary/20 bg-clip-text text-transparent p-[1px]"
+                      color={["#8B5CF6", "#F59E0B", "#3B82F6"]}
+                    >
+                      <Card className="h-full w-full group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <CardHeader className="relative backdrop-blur-sm">
                           <CardTitle className="flex items-center gap-2">
@@ -326,10 +336,13 @@ const Home = () => {
                           </CardDescription>
                         </CardHeader>
                       </Card>
-                    </MagicCard>
+                    </ShineBorder>
 
-                    <MagicCard>
-                      <Card className="group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+                    <ShineBorder
+                      className="pointer-events-none bg-gradient-to-b from-primary/80 to-primary/20 bg-clip-text text-transparent p-[1px]"
+                      color={["#10B981", "#3B82F6", "#EC4899"]}
+                    >
+                      <Card className="h-full w-full group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <CardHeader className="relative backdrop-blur-sm">
                           <CardTitle className="flex items-center gap-2">
@@ -344,10 +357,13 @@ const Home = () => {
                           </CardDescription>
                         </CardHeader>
                       </Card>
-                    </MagicCard>
+                    </ShineBorder>
 
-                    <MagicCard>
-                      <Card className="group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+                    <ShineBorder
+                      className="pointer-events-none bg-gradient-to-b from-primary/80 to-primary/20 bg-clip-text text-transparent p-[1px]"
+                      color={["#F59E0B", "#06B6D4", "#8B5CF6"]}
+                    >
+                      <Card className="h-full w-full group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <CardHeader className="relative backdrop-blur-sm">
                           <CardTitle className="flex items-center gap-2">
@@ -362,10 +378,13 @@ const Home = () => {
                           </CardDescription>
                         </CardHeader>
                       </Card>
-                    </MagicCard>
+                    </ShineBorder>
 
-                    <MagicCard>
-                      <Card className="group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+                    <ShineBorder
+                      className="pointer-events-none bg-gradient-to-b from-primary/80 to-primary/20 bg-clip-text text-transparent p-[1px]"
+                      color={["#EC4899", "#8B5CF6", "#10B981"]}
+                    >
+                      <Card className="h-full w-full group relative overflow-hidden border-muted/40 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <CardHeader className="relative backdrop-blur-sm">
                           <CardTitle className="flex items-center gap-2">
@@ -380,7 +399,7 @@ const Home = () => {
                           </CardDescription>
                         </CardHeader>
                       </Card>
-                    </MagicCard>
+                    </ShineBorder>
                   </div>
                 </section>
 

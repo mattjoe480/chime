@@ -35,52 +35,49 @@ pub enum Data {
     Url(String),
 }
 
-
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[repr(i32)]
 pub enum MessageCommand {
-    MessageSend ,
+    MessageSend,
     /// Receive a message
-    MessageReceive ,
+    MessageReceive,
     /// Update the timestamp (e.g., resend or reattempt)
-    UpdateTimestamp ,
+    UpdateTimestamp,
     /// Edit the content of an existing message
-    EditMessage ,
+    EditMessage,
     /// Delete the message from the system
-    DeleteMessage ,
+    DeleteMessage,
     /// Forward the message to other users
-    ForwardMessage ,
+    ForwardMessage,
     /// Retry sending a message (e.g., after failure)
-    RetrySend ,
+    RetrySend,
     /// Mark the message as important
-    MarkAsImportant ,
+    MarkAsImportant,
     /// Archive the message (for storage)
-    ArchiveMessage ,
+    ArchiveMessage,
     /// Unarchive a previously archived message
-    UnarchiveMessage ,
+    UnarchiveMessage,
     /// Mark the message as spam
-    MarkAsSpam ,
+    MarkAsSpam,
     /// Mark the message as read (may be used explicitly)
-    MarkAsRead ,
+    MarkAsRead,
     /// Mark the message as unread
-    MarkAsUnread ,
+    MarkAsUnread,
     /// Revoke a message (remove it from recipients' devices)
-    RevokeMessage ,
+    RevokeMessage,
     /// Pin the message to the top of a chat or thread
-    PinMessage ,
+    PinMessage,
     /// Unpin a previously pinned message
-    UnpinMessage ,          
+    UnpinMessage,
 }
-
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum MessageStatus {
     Pending,
-    Delivered ,
-    Read ,
-    Failed ,     
+    Delivered,
+    Read,
+    Failed,
 }
-
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct MessageEvent {
@@ -92,39 +89,39 @@ pub struct MessageEvent {
     /// List of recipient user IDs
     pub dst_uids: Vec<String>,
     /// The message content
-    pub message: Option<Message>,    
+    pub message: Option<Message>,
 }
 
 impl Into<i32> for MessageStatus {
-fn into(self) -> i32 {
-    match self {
-        MessageStatus::Pending => 0,   // PENDING = 0
-        MessageStatus::Delivered => 1, // DELIVERED = 1
-        MessageStatus::Read => 2,      // READ = 2
-        MessageStatus::Failed => 3,    // FAILED = 3
+    fn into(self) -> i32 {
+        match self {
+            MessageStatus::Pending => 0,   // PENDING = 0
+            MessageStatus::Delivered => 1, // DELIVERED = 1
+            MessageStatus::Read => 2,      // READ = 2
+            MessageStatus::Failed => 3,    // FAILED = 3
+        }
     }
-}
 }
 
 impl Into<i32> for MessageCommand {
     fn into(self) -> i32 {
         match self {
-            MessageCommand::MessageSend => 0,    // MESSAGE_SEND = 0
-            MessageCommand::MessageReceive => 1, // MESSAGE_RECEIVE = 1
-            MessageCommand::UpdateTimestamp => 2, // UPDATE_TIMESTAMP = 2
-            MessageCommand::EditMessage => 3,    // EDIT_MESSAGE = 3
-            MessageCommand::DeleteMessage => 4,  // DELETE_MESSAGE = 4
-            MessageCommand::ForwardMessage => 5, // FORWARD_MESSAGE = 5
-            MessageCommand::RetrySend => 6,      // RETRY_SEND = 6
-            MessageCommand::MarkAsImportant => 7, // MARK_AS_IMPORTANT = 7
-            MessageCommand::ArchiveMessage => 8, // ARCHIVE_MESSAGE = 8
+            MessageCommand::MessageSend => 0,      // MESSAGE_SEND = 0
+            MessageCommand::MessageReceive => 1,   // MESSAGE_RECEIVE = 1
+            MessageCommand::UpdateTimestamp => 2,  // UPDATE_TIMESTAMP = 2
+            MessageCommand::EditMessage => 3,      // EDIT_MESSAGE = 3
+            MessageCommand::DeleteMessage => 4,    // DELETE_MESSAGE = 4
+            MessageCommand::ForwardMessage => 5,   // FORWARD_MESSAGE = 5
+            MessageCommand::RetrySend => 6,        // RETRY_SEND = 6
+            MessageCommand::MarkAsImportant => 7,  // MARK_AS_IMPORTANT = 7
+            MessageCommand::ArchiveMessage => 8,   // ARCHIVE_MESSAGE = 8
             MessageCommand::UnarchiveMessage => 9, // UNARCHIVE_MESSAGE = 9
-            MessageCommand::MarkAsSpam => 10,    // MARK_AS_SPAM = 10
-            MessageCommand::MarkAsRead => 11,    // MARK_AS_READ = 11
-            MessageCommand::MarkAsUnread => 12,  // MARK_AS_UNREAD = 12
-            MessageCommand::RevokeMessage => 13, // REVOKE_MESSAGE = 13
-            MessageCommand::PinMessage => 14,    // PIN_MESSAGE = 14
-            MessageCommand::UnpinMessage => 15,  // UNPIN_MESSAGE = 15
+            MessageCommand::MarkAsSpam => 10,      // MARK_AS_SPAM = 10
+            MessageCommand::MarkAsRead => 11,      // MARK_AS_READ = 11
+            MessageCommand::MarkAsUnread => 12,    // MARK_AS_UNREAD = 12
+            MessageCommand::RevokeMessage => 13,   // REVOKE_MESSAGE = 13
+            MessageCommand::PinMessage => 14,      // PIN_MESSAGE = 14
+            MessageCommand::UnpinMessage => 15,    // UNPIN_MESSAGE = 15
         }
     }
 }
@@ -192,22 +189,22 @@ impl Into<MessageStatus> for i32 {
 impl Into<MessageCommand> for i32 {
     fn into(self) -> MessageCommand {
         match self {
-            0 => MessageCommand::MessageSend,    // MESSAGE_SEND = 0
-            1 => MessageCommand::MessageReceive, // MESSAGE_RECEIVE = 1
-            2 => MessageCommand::UpdateTimestamp, // UPDATE_TIMESTAMP = 2
-            3 => MessageCommand::EditMessage,    // EDIT_MESSAGE = 3
-            4 => MessageCommand::DeleteMessage,  // DELETE_MESSAGE = 4
-            5 => MessageCommand::ForwardMessage, // FORWARD_MESSAGE = 5
-            6 => MessageCommand::RetrySend,      // RETRY_SEND = 6
-            7 => MessageCommand::MarkAsImportant, // MARK_AS_IMPORTANT = 7
-            8 => MessageCommand::ArchiveMessage, // ARCHIVE_MESSAGE = 8
+            0 => MessageCommand::MessageSend,      // MESSAGE_SEND = 0
+            1 => MessageCommand::MessageReceive,   // MESSAGE_RECEIVE = 1
+            2 => MessageCommand::UpdateTimestamp,  // UPDATE_TIMESTAMP = 2
+            3 => MessageCommand::EditMessage,      // EDIT_MESSAGE = 3
+            4 => MessageCommand::DeleteMessage,    // DELETE_MESSAGE = 4
+            5 => MessageCommand::ForwardMessage,   // FORWARD_MESSAGE = 5
+            6 => MessageCommand::RetrySend,        // RETRY_SEND = 6
+            7 => MessageCommand::MarkAsImportant,  // MARK_AS_IMPORTANT = 7
+            8 => MessageCommand::ArchiveMessage,   // ARCHIVE_MESSAGE = 8
             9 => MessageCommand::UnarchiveMessage, // UNARCHIVE_MESSAGE = 9
-            10 => MessageCommand::MarkAsSpam,    // MARK_AS_SPAM = 10
-            11 => MessageCommand::MarkAsRead,    // MARK_AS_READ = 11
-            12 => MessageCommand::MarkAsUnread,  // MARK_AS_UNREAD = 12
-            13 => MessageCommand::RevokeMessage, // REVOKE_MESSAGE = 13
-            14 => MessageCommand::PinMessage,    // PIN_MESSAGE = 14
-            15 => MessageCommand::UnpinMessage,  // UNPIN_MESSAGE = 15
+            10 => MessageCommand::MarkAsSpam,      // MARK_AS_SPAM = 10
+            11 => MessageCommand::MarkAsRead,      // MARK_AS_READ = 11
+            12 => MessageCommand::MarkAsUnread,    // MARK_AS_UNREAD = 12
+            13 => MessageCommand::RevokeMessage,   // REVOKE_MESSAGE = 13
+            14 => MessageCommand::PinMessage,      // PIN_MESSAGE = 14
+            15 => MessageCommand::UnpinMessage,    // UNPIN_MESSAGE = 15
             _ => panic!("Unknown MessageCommand value: {}", self),
         }
     }

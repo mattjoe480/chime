@@ -10,7 +10,7 @@ pub struct Model {
     pub id: Uuid,
     #[sea_orm(column_type = "Text")]
     pub name: String,
-    #[sea_orm(column_type = "Text")]
+    #[sea_orm(column_type = "Text", unique)]
     pub email: String,
     #[sea_orm(column_type = "Text", nullable)]
     pub password: Option<String>,
@@ -23,6 +23,23 @@ pub struct Model {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    #[sea_orm(has_one = "super::doctor::Entity")]
+    Doctor,
+    #[sea_orm(has_one = "super::patient::Entity")]
+    Patient,
+}
+
+impl Related<super::doctor::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Doctor.def()
+    }
+}
+
+impl Related<super::patient::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Patient.def()
+    }
+}
 
 impl ActiveModelBehavior for ActiveModel {}

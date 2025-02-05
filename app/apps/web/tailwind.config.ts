@@ -21,7 +21,9 @@ module.exports = {
     			'accordion-up': 'accordion-up 0.2s ease-out',
     			'collapsible-down': 'collapsible-down 0.2s ease-out',
     			'collapsible-up': 'collapsible-up 0.2s ease-out',
-    			'caret-blink': 'caret-blink 1.25s ease-out infinite'
+    			'caret-blink': 'caret-blink 1.25s ease-out infinite',
+				'theme-glow': 'theme-glow 0.5s ease-in-out',
+				shine: "shine var(--duration) infinite linear",
     		},
     		boxShadow: {
     			input: '`0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08)`'
@@ -35,30 +37,67 @@ module.exports = {
     					backgroundPosition: '350% 50%, 350% 50%'
     				}
     			},
-				"theme-glow": {
-					"0%": { filter: "brightness(1)" },
-					"50%": { filter: "brightness(1.1)" },
-					"100%": { filter: "brightness(1)" },
-				},
+    			'theme-glow': {
+    				'0%': {
+    					filter: 'brightness(1)'
+    				},
+    				'50%': {
+    					filter: 'brightness(1.1)'
+    				},
+    				'100%': {
+    					filter: 'brightness(1)'
+    				}
+    			},
     			'accordion-down': {
-    				from: { height: 0 },
-    				to: { height: 'var(--radix-accordion-content-height)' }
+    				from: {
+    					height: 0
+    				},
+    				to: {
+    					height: 'var(--radix-accordion-content-height)'
+    				}
     			},
     			'accordion-up': {
-    				from: { height: 'var(--radix-accordion-content-height)' },
-    				to: { height: 0 }
+    				from: {
+    					height: 'var(--radix-accordion-content-height)'
+    				},
+    				to: {
+    					height: 0
+    				}
     			},
     			'collapsible-down': {
-    				from: { height: 0 },
-    				to: { height: 'var(--kb-collapsible-content-height)' }
+    				from: {
+    					height: 0
+    				},
+    				to: {
+    					height: 'var(--kb-collapsible-content-height)'
+    				}
     			},
     			'collapsible-up': {
-    				from: { height: 'var(--kb-collapsible-content-height)' },
-    				to: { height: 0 }
+    				from: {
+    					height: 'var(--kb-collapsible-content-height)'
+    				},
+    				to: {
+    					height: 0
+    				}
     			},
     			'caret-blink': {
-    				'0%, 70%, 100%': { opacity: 1 },
-    				'20%, 50%': { opacity: 0 }
+    				'0%, 70%, 100%': {
+    					opacity: 1
+    				},
+    				'20%, 50%': {
+    					opacity: 0
+    				}
+    			},
+    			shine: {
+    				'0%': {
+    					'background-position': '0% 0%'
+    				},
+    				'50%': {
+    					'background-position': '100% 100%'
+    				},
+    				to: {
+    					'background-position': '0% 0%'
+    				}
     			}
     		},
     		borderRadius: {
@@ -107,10 +146,7 @@ module.exports = {
     				'4': 'hsl(var(--chart-4))',
     				'5': 'hsl(var(--chart-5))'
     			},
-				animation: {
-					"theme-glow": "theme-glow 0.5s ease-in-out",
-				},
-    		},
+    		}
     	}
     },
   plugins: [addVariablesForColors,

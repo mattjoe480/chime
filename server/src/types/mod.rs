@@ -1,5 +1,6 @@
 pub(crate) mod auth;
 pub(crate) mod events;
+pub(crate) mod onboarding;
 pub(crate) mod ping;
 
 pub(crate) use auth::*;

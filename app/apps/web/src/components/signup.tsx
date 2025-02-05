@@ -1,232 +1,269 @@
 "use client";
-import React, {useState} from "react";
-import {cn} from "@/lib/utils";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {motion} from "framer-motion";
-import {IconBrandGoogle} from "@tabler/icons-react";
-import {signIn} from "next-auth/react"
-import {registerGrpc} from "@/app/actions";
-import {MultiStepLoader} from "@/components/ui/multi-step-loader";
-import {registerLoadingStates} from "@/lib/constants";
-import {SignInResponse} from "@/lib/types";
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
+import { IconBrandGoogle } from "@tabler/icons-react";
+import { signIn } from "next-auth/react";
+import { registerGrpc } from "@/app/actions";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+import { registerLoadingStates } from "@/lib/constants";
+import { SignInResponse } from "@/lib/types";
 import { Turnstile } from "next-turnstile";
-import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {CircleX} from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CircleX } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface SignupProps {
-    setIsUser?: (value: (((prevState: boolean) => boolean) | boolean)) => void
+  setIsUser?: (value: ((prevState: boolean) => boolean) | boolean) => void;
 }
 
-export default function Signup({setIsUser}: SignupProps) {
-    const [isLoading, setIsLoading] = useState(false);
-    const [nameError, setNameError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const [serverError, setServerError] = useState("");
-    const [showTurnstile, setShowTurnstile] = useState(false);
-    const [turnstileStatus, setTurnstileStatus] = useState<
-        "success" | "error" | "expired" | "required"
-    >("required");
-    const [error, setError] = useState<string | null>(null);
+export default function Signup({ setIsUser }: SignupProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [turnstileStatus, setTurnstileStatus] = useState<
+    "success" | "error" | "expired" | "required"
+  >("required");
+  const [error, setError] = useState<string | null>(null);
 
-    async function handleError(signinError: SignInResponse) {
-        console.log(signinError)
-        if (signinError.fields && signinError.fields.length > 0 && !signinError.isServerError) {
-            for (let i = 0; i < signinError.fields.length; i++) {
-                switch (signinError.fields[i]) {
-                    case "name":
-                        // @ts-ignore
-                        setNameError(signinError.error[i]);
-                        break;
-                    case "email":
-                        // @ts-ignore
-                        setEmailError(signinError.error[i]);
-                        break;
-                    case "password":
-                        // @ts-ignore
-                        setPasswordError(signinError.error[i]);
-                        break;
-                }
-            }
+  async function handleError(signinError: SignInResponse) {
+    console.log(signinError);
+    if (
+      signinError.fields &&
+      signinError.fields.length > 0 &&
+      !signinError.isServerError
+    ) {
+      for (let i = 0; i < signinError.fields.length; i++) {
+        switch (signinError.fields[i]) {
+          case "name":
+            // @ts-ignore
+            setNameError(signinError.error[i]);
+            break;
+          case "email":
+            // @ts-ignore
+            setEmailError(signinError.error[i]);
+            break;
+          case "password":
+            // @ts-ignore
+            setPasswordError(signinError.error[i]);
+            break;
         }
-        if (signinError.isServerError) {
-            let err = signinError.fields!.at(0) as string;
-            err = err.replace("_", " ").toLowerCase()
-            setServerError(err.charAt(0).toUpperCase() + err.slice(1))
-        }
+      }
     }
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        setNameError("");
-        setEmailError("");
-        setPasswordError("");
-        setServerError("")
-        setIsLoading(true);
-        const formData = new FormData(e.currentTarget);
-        let token: string | undefined = formData.get("cf-turnstile-response")?.toString();
-        if (token === undefined || token === "") {
-            if (setIsUser) {
-                setShowTurnstile(true);
-            }
+    if (signinError.isServerError) {
+      let err = signinError.fields!.at(0) as string;
+      err = err.replace("_", " ").toLowerCase();
+      setServerError(err.charAt(0).toUpperCase() + err.slice(1));
+    }
+  }
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setNameError("");
+    setEmailError("");
+    setPasswordError("");
+    setServerError("");
+    setIsLoading(true);
+    const formData = new FormData(e.currentTarget);
+    let token = formData.get("cf-turnstile-response")?.toString();
+    if (token === undefined || token === "") {
+      setIsLoading(false);
+      setServerError("Please complete the security check");
+      return;
+    }
+    await registerGrpc(formData)
+      .then((response) => {
+        if (!response.isError && !response.isServerError) {
+          setTimeout(() => {
             setIsLoading(false);
-            setServerError("Please try again")
-            return;
+            if (setIsUser) setIsUser(true);
+          }, 2500);
+        } else {
+          setIsLoading(false);
+          handleError(response);
         }
-        await registerGrpc(formData).then((response) => {
-            if (!response.isError && !response.isServerError){
-                setTimeout(() => {
-                    setIsLoading(false);
-                    if (setIsUser) setIsUser(true);
-                },2500);
-            }else {
-                setIsLoading(false);
-                handleError(response);
-            }
-        })
-            .catch((_error) =>{
-                setIsLoading(false);
-                alert("Please contact the developer!");
-            });
-    }
+      })
+      .catch((_error) => {
+        setIsLoading(false);
+        alert("Please contact the developer!");
+      });
+  }
 
-    return (
-        <div
-            className=" select-none pt-[10vh] sm:pt-4 lg:pt-10 z-10 max-w-md w-full  mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black min-h-lvh sm:min-h-72 md:min-h-64 lg:min-h-64">
-            <MultiStepLoader loadingStates={registerLoadingStates} loading={isLoading} duration={300} loop={false}/>
-            <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
-                Welcome to Chime
-            </h2>
-            <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300 text-center">
-                Sign up to Chime to access all the features
-            </p>
+  return (
+    <div className="flex flex-col min-h-screen bg-background">
+      <div className="flex-grow flex items-center justify-center p-4">
+        <Card className="w-full max-w-xl relative z-10">
+          <CardHeader className="space-y-2 pb-8">
+            <CardTitle className="text-center text-2xl">
+              Welcome to Chime
+            </CardTitle>
+            <CardDescription className="text-center text-base">
+              Sign up to Chime to access all the features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MultiStepLoader
+              loadingStates={registerLoadingStates}
+              loading={isLoading}
+              duration={300}
+              loop={false}
+            />
 
-            <form className="my-8 pt-[4vh] sm:pt-2 md:pt-1 lg:pt-1" autoComplete="on" onSubmit={handleSubmit}>
-                {serverError !== "" && (
-                        <Alert className="mb-4">
-                        <CircleX color="red" className="h-4 w-4"/>
-                        <AlertTitle className="text-red-500 text-md">Cannot register</AlertTitle>
-                        <AlertDescription>
-                            {serverError}
-                        </AlertDescription>
-                    </Alert>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {serverError !== "" && (
+                <Alert variant="destructive">
+                  <CircleX className="h-4 w-4" />
+                  <AlertTitle>Cannot register</AlertTitle>
+                  <AlertDescription>{serverError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input name="name" id="name" type="text" autoComplete="name" />
+                {nameError !== "" && (
+                  <span className="text-sm text-destructive">{nameError}</span>
                 )}
-                <LabelInputContainer className="mb-4">
-                    <Label htmlFor="email">Name</Label>
-                    <Input name="name" id="name" type="text" autoComplete="name"/>
-                    {nameError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{nameError}</span>}
-                </LabelInputContainer>
-                <LabelInputContainer className="mb-4">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input name="email" id="email" type="email" autoComplete="email"/>
-                    {emailError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{emailError}</span>}
-                </LabelInputContainer>
-                <LabelInputContainer className="mb-4">
-                    <Label htmlFor="password">Password</Label>
-                    <Input name="password" id="password" autoComplete="new-password" placeholder="••••••••" type="password"/>
-                    {passwordError!=="" && <span className="text-sm text-red-600 dark:text-red-500">{passwordError}</span>}
-                </LabelInputContainer>
-                <motion.button
-                    className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-700 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
-                    type="submit"
-                    whileHover={{scale: 1.1}}
-                    whileTap={{scale: 0.90}}
-                >
-                    Sign up &rarr;
-                    <BottomGradient/>
-                </motion.button>
+              </div>
 
-                <div
-                    className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full"/>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  name="email"
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                />
+                {emailError !== "" && (
+                  <span className="text-sm text-destructive">{emailError}</span>
+                )}
+              </div>
 
-                <div className="flex flex-col space-y-4">
-                    <motion.button
-                        className="relative group/btn flex space-x-2 items-center justify-center px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-                        type="submit"
-                        whileHover={{scale: 1.1}}
-                        whileTap={{scale: 0.90}}
-                        onClick={() => signIn("google")}
-                    >
-                        <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300"/>
-                        <span className="text-neutral-700 dark:text-white text-sm">
-                        Google
-                    </span>
-                        <BottomGradient/>
-                    </motion.button>
-                    <Turnstile
-                        className={`w-full items-center justify-center  flex-col space-y-4 ${showTurnstile ? "flex" : "hidden"}`}
-                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                        retry="auto"
-                        refreshExpired="auto"
-                        sandbox={process.env.NODE_ENV === "development"}
-                        onError={() => {
-                            setTurnstileStatus("error");
-                            setServerError("Security check failed. Please try again.");
-                        }}
-                        onExpire={() => {
-                            setTurnstileStatus("expired");
-                            setServerError("Security check expired. Please verify again.");
-                        }}
-                        onLoad={() => {
-                            setTurnstileStatus("required");
-                            setShowTurnstile(true);
-                            setError(null);
-                        }}
-                        onVerify={(token) => {
-                            setTurnstileStatus("success");
-                            setShowTurnstile(false);
-                            setError(null);
-                        }}
-                    />
-                    {error && (
-                        <div
-                            className="flex items-center gap-2 text-red-500 text-sm mb-2"
-                            aria-live="polite"
-                        >
-                            <span>{error}</span>
-                        </div>
-                    )}
-                    <div className="flex flex-row text-sm left-0 space-x-2 ml-1">
-                        <h2 className="dark:text-gray-200">
-                            Already have an account?
-                        </h2>
-                        <button
-                            onClick={() => {
-                                if (setIsUser) {
-                                    setIsUser(true)
-                                }
-                            }}
-                            className="dark:text-cyan-400 text-cyan-600">
-                            Login
-                        </button>
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  name="password"
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                />
+                {passwordError !== "" && (
+                  <span className="text-sm text-destructive">
+                    {passwordError}
+                  </span>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing up...
+                  </>
+                ) : (
+                  "Sign up"
+                )}
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
                 </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                type="button"
+                className="w-full"
+                onClick={() => signIn("google")}
+              >
+                <IconBrandGoogle className="mr-2 h-4 w-4" />
+                Google
+              </Button>
+
+              <Turnstile
+                className="flex justify-center"
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                retry="auto"
+                refreshExpired="auto"
+                sandbox={process.env.NODE_ENV === "development"}
+                onError={() => {
+                  setTurnstileStatus("error");
+                  setServerError("Security check failed. Please try again.");
+                }}
+                onExpire={() => {
+                  setTurnstileStatus("expired");
+                  setServerError(
+                    "Security check expired. Please verify again."
+                  );
+                }}
+                onLoad={() => {
+                  setTurnstileStatus("required");
+                  setError(null);
+                }}
+                onVerify={() => {
+                  setTurnstileStatus("success");
+                  setError(null);
+                }}
+              />
+
+              <div className="text-sm text-center">
+                <span className="text-muted-foreground">
+                  Already have an account?{" "}
+                </span>
+                <Button
+                  variant="link"
+                  className="p-0"
+                  disabled={isLoading}
+                  onClick={() => setIsUser?.(true)}
+                >
+                  Login
+                </Button>
+              </div>
             </form>
-        </div>
-    );
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }
 
 const BottomGradient = () => {
-    return (
-        <>
-            <span
-                className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"/>
-            <span
-                className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent"/>
-        </>
-    );
+  return (
+    <>
+      <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+      <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+    </>
+  );
 };
 
 const LabelInputContainer = ({
-                                 children,
-                                 className,
-                             }: {
-    children: React.ReactNode;
-    className?: string;
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
 }) => {
-    return (
-        <div className={cn("flex flex-col space-y-2 w-full", className)}>
-            {children}
-        </div>
-    );
+  return (
+    <div className={cn("flex flex-col space-y-2 w-full", className)}>
+      {children}
+    </div>
+  );
 };

@@ -21,12 +21,17 @@ export namespace auth {
         WEAK_PASSWORD = 10,
         INVALID_PROVIDER = 11,
         INTERNAL_ERROR = 12,
-        INVALID_EMAIL = 13
+        INVALID_EMAIL = 13,
+        OK = 14
     }
     export enum AuthProvider {
         GOOGLE = 0,
         FACEBOOK = 1,
         GITHUB = 2
+    }
+    export enum Roles {
+        PATIENT = 0,
+        DOCTOR = 1
     }
     export class OAuth extends pb_1.Message {
         #one_of_decls: number[][] = [];
@@ -200,6 +205,7 @@ export namespace auth {
             refresh_token_expiration?: dependency_1.google.protobuf.Timestamp;
             mfa_required?: boolean;
             last_login?: dependency_1.google.protobuf.Timestamp;
+            role?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -233,6 +239,9 @@ export namespace auth {
                 }
                 if ("last_login" in data && data.last_login != undefined) {
                     this.last_login = data.last_login;
+                }
+                if ("role" in data && data.role != undefined) {
+                    this.role = data.role;
                 }
             }
         }
@@ -305,6 +314,12 @@ export namespace auth {
         get has_last_login() {
             return pb_1.Message.getField(this, 10) != null;
         }
+        get role() {
+            return pb_1.Message.getFieldWithDefault(this, 11, "") as string;
+        }
+        set role(value: string) {
+            pb_1.Message.setField(this, 11, value);
+        }
         static fromObject(data: {
             uid?: string;
             email?: string;
@@ -316,6 +331,7 @@ export namespace auth {
             refresh_token_expiration?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
             mfa_required?: boolean;
             last_login?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
+            role?: string;
         }): Token {
             const message = new Token({});
             if (data.uid != null) {
@@ -348,6 +364,9 @@ export namespace auth {
             if (data.last_login != null) {
                 message.last_login = dependency_1.google.protobuf.Timestamp.fromObject(data.last_login);
             }
+            if (data.role != null) {
+                message.role = data.role;
+            }
             return message;
         }
         toObject() {
@@ -362,6 +381,7 @@ export namespace auth {
                 refresh_token_expiration?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
                 mfa_required?: boolean;
                 last_login?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
+                role?: string;
             } = {};
             if (this.uid != null) {
                 data.uid = this.uid;
@@ -393,6 +413,9 @@ export namespace auth {
             if (this.last_login != null) {
                 data.last_login = this.last_login.toObject();
             }
+            if (this.role != null) {
+                data.role = this.role;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -419,6 +442,8 @@ export namespace auth {
                 writer.writeBool(9, this.mfa_required);
             if (this.has_last_login)
                 writer.writeMessage(10, this.last_login, () => this.last_login.serialize(writer));
+            if (this.role.length)
+                writer.writeString(11, this.role);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -457,6 +482,9 @@ export namespace auth {
                         break;
                     case 10:
                         reader.readMessage(message.last_login, () => message.last_login = dependency_1.google.protobuf.Timestamp.deserialize(reader));
+                        break;
+                    case 11:
+                        message.role = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -1299,6 +1327,297 @@ export namespace auth {
             return RegisterStatus.deserialize(bytes);
         }
     }
+    export class RoleRequest extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            email?: string;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("email" in data && data.email != undefined) {
+                    this.email = data.email;
+                }
+            }
+        }
+        get email() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set email(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            email?: string;
+        }): RoleRequest {
+            const message = new RoleRequest({});
+            if (data.email != null) {
+                message.email = data.email;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                email?: string;
+            } = {};
+            if (this.email != null) {
+                data.email = this.email;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.email.length)
+                writer.writeString(1, this.email);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): RoleRequest {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new RoleRequest();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.email = reader.readString();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): RoleRequest {
+            return RoleRequest.deserialize(bytes);
+        }
+    }
+    export class RoleResponse extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            role?: string;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("role" in data && data.role != undefined) {
+                    this.role = data.role;
+                }
+            }
+        }
+        get role() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set role(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            role?: string;
+        }): RoleResponse {
+            const message = new RoleResponse({});
+            if (data.role != null) {
+                message.role = data.role;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                role?: string;
+            } = {};
+            if (this.role != null) {
+                data.role = this.role;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.role.length)
+                writer.writeString(1, this.role);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): RoleResponse {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new RoleResponse();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.role = reader.readString();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): RoleResponse {
+            return RoleResponse.deserialize(bytes);
+        }
+    }
+    export class CreateRoleRequest extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            email?: string;
+            role?: Roles;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("email" in data && data.email != undefined) {
+                    this.email = data.email;
+                }
+                if ("role" in data && data.role != undefined) {
+                    this.role = data.role;
+                }
+            }
+        }
+        get email() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set email(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get role() {
+            return pb_1.Message.getFieldWithDefault(this, 2, Roles.PATIENT) as Roles;
+        }
+        set role(value: Roles) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        static fromObject(data: {
+            email?: string;
+            role?: Roles;
+        }): CreateRoleRequest {
+            const message = new CreateRoleRequest({});
+            if (data.email != null) {
+                message.email = data.email;
+            }
+            if (data.role != null) {
+                message.role = data.role;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                email?: string;
+                role?: Roles;
+            } = {};
+            if (this.email != null) {
+                data.email = this.email;
+            }
+            if (this.role != null) {
+                data.role = this.role;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.email.length)
+                writer.writeString(1, this.email);
+            if (this.role != Roles.PATIENT)
+                writer.writeEnum(2, this.role);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CreateRoleRequest {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CreateRoleRequest();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.email = reader.readString();
+                        break;
+                    case 2:
+                        message.role = reader.readEnum();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): CreateRoleRequest {
+            return CreateRoleRequest.deserialize(bytes);
+        }
+    }
+    export class CreateRoleResponse extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            status?: Status;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("status" in data && data.status != undefined) {
+                    this.status = data.status;
+                }
+            }
+        }
+        get status() {
+            return pb_1.Message.getFieldWithDefault(this, 1, Status.AUTH_SUCCESS) as Status;
+        }
+        set status(value: Status) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            status?: Status;
+        }): CreateRoleResponse {
+            const message = new CreateRoleResponse({});
+            if (data.status != null) {
+                message.status = data.status;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                status?: Status;
+            } = {};
+            if (this.status != null) {
+                data.status = this.status;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.status != Status.AUTH_SUCCESS)
+                writer.writeEnum(1, this.status);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CreateRoleResponse {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CreateRoleResponse();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.status = reader.readEnum();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): CreateRoleResponse {
+            return CreateRoleResponse.deserialize(bytes);
+        }
+    }
     interface GrpcUnaryServiceInterface<P, R> {
         (message: P, metadata: grpc_1.Metadata, options: grpc_1.CallOptions, callback: grpc_1.requestCallback<R>): grpc_1.ClientUnaryCall;
         (message: P, metadata: grpc_1.Metadata, callback: grpc_1.requestCallback<R>): grpc_1.ClientUnaryCall;
@@ -1360,6 +1679,24 @@ export namespace auth {
                 requestDeserialize: (bytes: Buffer) => User.deserialize(new Uint8Array(bytes)),
                 responseSerialize: (message: RegisterStatus) => Buffer.from(message.serialize()),
                 responseDeserialize: (bytes: Buffer) => RegisterStatus.deserialize(new Uint8Array(bytes))
+            },
+            role: {
+                path: "/auth.auth/role",
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (message: RoleRequest) => Buffer.from(message.serialize()),
+                requestDeserialize: (bytes: Buffer) => RoleRequest.deserialize(new Uint8Array(bytes)),
+                responseSerialize: (message: RoleResponse) => Buffer.from(message.serialize()),
+                responseDeserialize: (bytes: Buffer) => RoleResponse.deserialize(new Uint8Array(bytes))
+            },
+            createRole: {
+                path: "/auth.auth/createRole",
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (message: CreateRoleRequest) => Buffer.from(message.serialize()),
+                requestDeserialize: (bytes: Buffer) => CreateRoleRequest.deserialize(new Uint8Array(bytes)),
+                responseSerialize: (message: CreateRoleResponse) => Buffer.from(message.serialize()),
+                responseDeserialize: (bytes: Buffer) => CreateRoleResponse.deserialize(new Uint8Array(bytes))
             }
         };
         [method: string]: grpc_1.UntypedHandleCall;
@@ -1367,6 +1704,8 @@ export namespace auth {
         abstract token(call: grpc_1.ServerUnaryCall<RefreshToken, AuthToken>, callback: grpc_1.sendUnaryData<AuthToken>): void;
         abstract revoke(call: grpc_1.ServerUnaryCall<RefreshToken, Revoke>, callback: grpc_1.sendUnaryData<Revoke>): void;
         abstract register(call: grpc_1.ServerUnaryCall<User, RegisterStatus>, callback: grpc_1.sendUnaryData<RegisterStatus>): void;
+        abstract role(call: grpc_1.ServerUnaryCall<RoleRequest, RoleResponse>, callback: grpc_1.sendUnaryData<RoleResponse>): void;
+        abstract createRole(call: grpc_1.ServerUnaryCall<CreateRoleRequest, CreateRoleResponse>, callback: grpc_1.sendUnaryData<CreateRoleResponse>): void;
     }
     export class authClient extends grpc_1.makeGenericClientConstructor(UnimplementedauthService.definition, "auth", {}) {
         constructor(address: string, credentials: grpc_1.ChannelCredentials, options?: Partial<grpc_1.ChannelOptions>) {
@@ -1383,6 +1722,12 @@ export namespace auth {
         };
         register: GrpcUnaryServiceInterface<User, RegisterStatus> = (message: User, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<RegisterStatus>, options?: grpc_1.CallOptions | grpc_1.requestCallback<RegisterStatus>, callback?: grpc_1.requestCallback<RegisterStatus>): grpc_1.ClientUnaryCall => {
             return super.register(message, metadata, options, callback);
+        };
+        role: GrpcUnaryServiceInterface<RoleRequest, RoleResponse> = (message: RoleRequest, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<RoleResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<RoleResponse>, callback?: grpc_1.requestCallback<RoleResponse>): grpc_1.ClientUnaryCall => {
+            return super.role(message, metadata, options, callback);
+        };
+        createRole: GrpcUnaryServiceInterface<CreateRoleRequest, CreateRoleResponse> = (message: CreateRoleRequest, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<CreateRoleResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<CreateRoleResponse>, callback?: grpc_1.requestCallback<CreateRoleResponse>): grpc_1.ClientUnaryCall => {
+            return super.createRole(message, metadata, options, callback);
         };
     }
 }
