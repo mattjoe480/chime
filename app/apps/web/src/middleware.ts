@@ -1,11 +1,9 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import {NextResponse} from "next/server";
+import {auth} from "@/auth";
 
 export async function middleware(request: Request) {
   const session = await auth();
   const pathname = new URL(request.url).pathname;
-
-  // Allow access to signin page when not authenticated
   if (pathname.startsWith("/auth/signin")) {
     if (session?.user) {
       const role = session.user.role?.toLowerCase() || "none";
@@ -15,7 +13,6 @@ export async function middleware(request: Request) {
     return NextResponse.next();
   }
 
-  // If not authenticated, redirect to signin
   if (!session?.user) {
     return NextResponse.redirect(new URL("/auth/signin", request.url));
   }

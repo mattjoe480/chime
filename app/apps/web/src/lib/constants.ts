@@ -1,5 +1,5 @@
-import pino from 'pino';
 import localFont from "next/font/local";
+
 export const loginLoadingStates = [
     {
         text: "Preparing your secret lair...",
@@ -55,10 +55,6 @@ export const registerLoadingStates = [
 ];
 
 
-export const logger = pino({
-    browser: {asObject: true},
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',  // Adjust log level for production or development
-});
 
 export const logirent = localFont({
     src: [

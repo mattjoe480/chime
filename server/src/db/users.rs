@@ -97,14 +97,14 @@ impl User {
             provider: Set(self.provider),
             provideruid: Set(self.provider_uid),
             registerdate: Set(Some(DateTime::from(Utc::now()))),
-            role: Set(self.role),
+            role: Set(Role::User),
         };
         if let Err(e) = user.insert(&db.await).await {
             if e.to_string().contains("users_email_key") {
                 error!("Duplicate email error: {}", email);
                 return Err(AuthStatus::DuplicateEmail);
             }
-
+            error!("{}", e);
             return Err(AuthStatus::InternalError);
         }
         Ok(())

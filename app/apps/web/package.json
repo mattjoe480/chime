@@ -31,11 +31,13 @@
     "google-protobuf": "^3.21.4",
     "grpc-js-reflection-client": "^1.2.23",
     "i": "^0.3.7",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.469.0",
     "mini-svg-data-uri": "^1.4.4",
     "motion": "^11.18.1",
     "next": "15.1.5",
     "next-auth": "^5.0.0-beta.25",
+    "next-logger": "^5.0.1",
     "next-themes": "^0.4.4",
     "next-turnstile": "^1.0.1",
     "pino": "^9.6.0",
@@ -47,8 +49,7 @@
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.0.5",
-    "zod": "^3.24.1",
-    "jwt-decode": "^4.0.0"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -65,5 +66,5 @@
   },
   "module": "index.ts",
   "type": "module",
-  "packageManager": "pnpm@9.15.2"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

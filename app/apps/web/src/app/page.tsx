@@ -1,39 +1,28 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import {useEffect, useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Card, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
+  TbBellRinging,
   TbCalendar,
-  TbUserCircle,
+  TbCalendarStats,
   TbDeviceMobile,
   TbMessageChatbot,
-  TbBellRinging,
-  TbShieldLock,
-  TbStethoscope,
-  TbCalendarStats,
   TbMessages,
   TbReportAnalytics,
+  TbShieldLock,
+  TbStethoscope,
+  TbUserCircle,
 } from "react-icons/tb";
-import { MagicCard } from "@/components/ui/magic-card";
-import { NavBar } from "@/components/nav-bar";
-import { Footer } from "@/components/footer";
-import { StatsSection } from "@/components/counter-stats";
-import { TestimonialsSection } from "@/components/testimonials";
+import {NavBar} from "@/components/nav-bar";
+import {Footer} from "@/components/footer";
+import {StatsSection} from "@/components/counter-stats";
+import {TestimonialsSection} from "@/components/testimonials";
 import Script from "next/script";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 import ScrollProgress from "@/components/ui/scroll-progress";
-import { ShineBorder } from "@/components/ui/shine-border";
+import {ShineBorder} from "@/components/ui/shine-border";
 
 const FAQSection = () => {
   return (
@@ -142,7 +131,6 @@ const HowItWorks = () => {
 
     return () => clearInterval(intervalId);
   }, [steps.length]);
-
   return (
     <div className="relative py-24">
       <div className="absolute inset-0 -z-10">

@@ -1,27 +1,29 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { completeOnboarding } from "@/lib/grpc/onboarding";
-import { onboarding } from "@/proto/onboarding";
+import {NextResponse} from "next/server";
+import {auth} from "@/auth";
+import {completeOnboarding} from "@/lib/grpc/onboarding";
+import {onboarding} from "@/proto/onboarding";
 
 export async function POST(req: Request) {
-  try { 
+  try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       console.error("No user ID in session:", session);
       return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
+              {error: "User not authenticated"},
+              {status: 401}
       );
     }
 
     const data = await req.json();
-    const { userType, ...profileData } = data;
+    const {userType, ...profileData} = data;
 
     // Create the appropriate onboarding request based on user type
     let onboardingRequest;
     if (userType === 'patient') {
+      // @ts-ignore
       onboardingRequest = new onboarding.OnboardingRequest({
+        // @ts-ignore
         user_id: session.user.id,
         patient: new onboarding.PatientOnboardingRequest({
           user_id: session.user.id,
@@ -33,7 +35,9 @@ export async function POST(req: Request) {
         })
       });
     } else {
+      // @ts-ignore
       onboardingRequest = new onboarding.OnboardingRequest({
+        // @ts-ignore
         user_id: session.user.id,
         doctor: new onboarding.DoctorOnboardingRequest({
           user_id: session.user.id,
@@ -49,8 +53,8 @@ export async function POST(req: Request) {
     console.log("Onboarding request:", onboardingRequest.toObject());
 
     const response = await completeOnboarding(
-      onboardingRequest,
-      session.user.chime_access_token
+            onboardingRequest,
+            session.user.chime_access_token
     );
 
     return NextResponse.json({
@@ -61,8 +65,8 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Onboarding error:", error);
     return NextResponse.json(
-      { error: "Failed to complete onboarding" },
-      { status: 500 }
+            {error: "Failed to complete onboarding"},
+            {status: 500}
     );
   }
 } 

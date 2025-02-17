@@ -32,7 +32,7 @@ RUN \
   fi
 # Runner copies everything from the installer, then runs the app as a locked
 # down nonroot user
-FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 WORKDIR /app
 
 # Copy in the built files. Automatically leverage output traces to reduce image

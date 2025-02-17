@@ -17,7 +17,7 @@ impl MigrationTrait for Migration {
         let db = manager.get_connection();
 
         // Create role enum with proper values in lowercase
-        db.execute_unprepared("CREATE TYPE role AS ENUM ('admin', 'patient', 'doctor', 'none')")
+        db.execute_unprepared("CREATE TYPE role AS ENUM ('admin', 'user', 'none')")
             .await
             .expect("Failed to create role enum");
 
