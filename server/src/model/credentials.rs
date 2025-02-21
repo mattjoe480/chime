@@ -1,8 +1,10 @@
 use crate::controllers::initialize::get_redis_conn;
+use crate::entity::users;
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use lazy_static::lazy_static;
 use redis::{Commands, RedisError, RedisResult};
+use sea_orm::EntityTrait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::env;
@@ -19,7 +21,7 @@ lazy_static! {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AccessTokenClaims {
     pub(crate) sub: String,
-    roles: Vec<String>,
+    pub(crate) role: String,
     pub(crate) exp: usize,
     pub(crate) iat: usize,
     aud: String,
@@ -42,9 +44,16 @@ impl AccessTokenClaims {
             .expect("JWT_TTL must be set!!!")
             .parse::<i64>()
             .unwrap();
+
+        let user = users::Entity::find_by_id(uid)
+            .one(DB.get().unwrap())
+            .await
+            .unwrap()
+            .unwrap();
+
         Self {
             sub: uid.to_string(),
-            roles: vec!["user".to_string()],
+            role: user.role.to_value(),
             exp: (Utc::now() + Duration::minutes(ttl)).timestamp() as usize,
             iat: Utc::now().timestamp() as usize,
             aud: "localhost".to_string(),

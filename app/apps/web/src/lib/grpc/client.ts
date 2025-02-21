@@ -2,7 +2,7 @@ import {serviceHelper} from "grpc-js-reflection-client";
 const { GrpcReflection } = require('grpc-js-reflection-client');
 const grpc =  require('@grpc/grpc-js');
 import {ListMethodsType} from "grpc-js-reflection-client/dist/Types/ListMethodsType";
-
+import { logger } from "@/next-logger.config"
 const url = process.env.GRPC_SERVICE_URL!;
 const client = new grpc.Client(url, grpc.credentials.createInsecure());
 const reflectionClient = new GrpcReflection(url, grpc.ChannelCredentials.createInsecure());
@@ -37,7 +37,7 @@ export async function display() {
     for (const service of services) {
         let methods = await getMethods(service);
         for (const method of methods) {
-            console.log("Service " + service + ": " + method.name);
+            logger.info("Service " + service + ": " + method.name);
         }
     }
 

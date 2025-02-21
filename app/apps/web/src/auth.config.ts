@@ -1,7 +1,7 @@
 import {CredentialsSignin, type NextAuthConfig} from "next-auth"
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import {logger} from "@/lib/constants";
+import {logger} from "@/next-logger.config";
 import {validateTurnstileToken} from "next-turnstile";
 import {v4} from "uuid";
 import {jwtDecode} from "jwt-decode";
@@ -53,13 +53,13 @@ export default {
         });
         if (!response.ok) {
           const error = await response.text()
-          console.log(`Login failed: ${error || "Internal server error"}`);
+          logger.info(`Login failed: ${error || "Internal server error"}`);
           throw new CredentialsSignin("Cannot connect to the server");
         }
         const user = await response.json();
-        console.log(user);
+        logger.info(user);
         if (!user || typeof user !== 'object') {
-          console.log("Invalid response from server");
+          logger.info("Invalid response from server");
           throw new CredentialsSignin("Invalid response from server");
         }
         if (user.status === 0 && user.error_message === '') return {
@@ -81,7 +81,6 @@ export default {
   },
   callbacks: {
     async jwt({token, user, account}) {
-      // Initial sign in with Google
       if (account?.provider === "google" && user) {
         const { access_token, expires_in, expires_at, provider, providerAccountId } = account;
         const url = process.env.URL + '/api/login/google';
@@ -108,21 +107,18 @@ export default {
               token.chime_refresh_token = data.refresh_token;
               token.id = data.uid;
               
-              // Check role
               const roleResponse = await fetch(
                 `${process.env.URL}/api/role?email=${encodeURIComponent(user.email!)}`
               );
               const roleData = await roleResponse.json();
-              console.log("Role data:", roleData);
+              logger.info("Role data:", roleData);
               token.role = roleData.role;
             }
           }
         } catch (error) {
-          console.error("Error in Google auth:", error);
+          logger.error("Error in Google auth:", error);
         }
       }
-
-      // Initial sign in with credentials
       if (user && account?.provider === "credentials") {
         token.id = user.id;
         token.email = user.email;
@@ -136,14 +132,14 @@ export default {
             `${process.env.URL}/api/role?email=${encodeURIComponent(user.email!)}`
           );
           const roleData = await roleResponse.json();
-          console.log("Role data:", roleData);
+          logger.info("Role data:", roleData);
           token.role = roleData.role;
         } catch (error) {
-          console.error("Error checking role:", error);
+          logger.error("Error checking role:", error);
         }
       }
 
-      console.log("JWT token:", token);
+      logger.info("JWT token:", token);
       return token;
     },
 
@@ -162,9 +158,9 @@ export default {
         // @ts-ignore
         session.error = token.error;
 
-        console.log("Session user ID:", session.user.id);
+        logger.info("Session user ID:", session.user.id);
       }
-      console.log("Session:", session);
+      logger.info("Session:", session);
       return session;
     },
 

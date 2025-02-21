@@ -62,6 +62,12 @@ impl MigrationTrait for Migration {
                             .string()
                             .not_null(),
                     )
+                    .col(
+                        ColumnDef::new(Doctor::IsVerified)
+                            .boolean()
+                            .not_null()
+                            .default(false),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_doctor_user")
@@ -120,6 +126,7 @@ enum Doctor {
     Specialization,
     YearsOfExperience,
     HospitalAffiliation,
+    IsVerified,
 }
 
 #[derive(DeriveIden)]

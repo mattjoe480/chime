@@ -1,0 +1,184 @@
+syntax = "proto3";
+package admin;
+
+import "google/protobuf/timestamp.proto";
+import "auth.proto";
+
+// User management messages
+message AdminUser {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string role = 4;
+  bool is_active = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  string provider = 8;
+}
+
+message Doctor {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  bool is_verified = 4;
+  string specialization = 5;
+  string license_number = 6;
+  repeated string certificates = 7;
+  string experience = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  bool is_active = 11;
+}
+
+message Patient {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string medical_history = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  bool is_active = 7;
+}
+
+message ListUsersRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string role_filter = 4;
+}
+
+message ListUsersResponse {
+  repeated AdminUser users = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+message ListDoctorsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  bool verification_status = 4;  // filter by verified/unverified
+  string specialization = 5;
+}
+
+message ListDoctorsResponse {
+  repeated Doctor doctors = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+message ListPatientsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+}
+
+message ListPatientsResponse {
+  repeated Patient patients = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  optional string name = 2;
+  optional string role = 3;
+  optional bool is_active = 4;
+}
+
+message UpdateUserResponse {
+  AdminUser user = 1;
+  auth.Status status = 2;
+}
+
+message VerifyDoctorRequest {
+  string doctor_id = 1;
+  bool verify = 2;  // true to verify, false to reject
+  string admin_notes = 3;
+}
+
+message VerifyDoctorResponse {
+  Doctor doctor = 1;
+  auth.Status status = 2;
+}
+
+message GetDoctorDetailsRequest {
+  string doctor_id = 1;
+}
+
+message GetDoctorDetailsResponse {
+  Doctor doctor = 1;
+  auth.Status status = 2;
+}
+
+message GetPatientDetailsRequest {
+  string patient_id = 1;
+}
+
+message GetPatientDetailsResponse {
+  Patient patient = 1;
+  auth.Status status = 2;
+}
+
+// Analytics messages
+message UserStats {
+  int32 total_users = 1;
+  int32 active_users = 2;
+  int32 doctors = 3;
+  int32 patients = 4;
+  int32 new_users_last_30_days = 5;
+}
+
+message StatsRequest {
+  string time_range = 1; // "daily", "weekly", "monthly", "yearly"
+}
+
+message StatsResponse {
+  UserStats user_stats = 1;
+}
+
+// Audit log messages
+message AuditLog {
+  string id = 1;
+  string user_id = 2;
+  string action = 3;
+  string resource = 4;
+  string details = 5;
+  google.protobuf.Timestamp timestamp = 6;
+  string ip_address = 7;
+}
+
+message GetAuditLogsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string user_id = 3;
+  string action_filter = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+}
+
+message GetAuditLogsResponse {
+  repeated AuditLog logs = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+// Admin service definition
+service AdminService {
+  // User management
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  
+  // Doctor management
+  rpc ListDoctors(ListDoctorsRequest) returns (ListDoctorsResponse);
+  rpc GetDoctorDetails(GetDoctorDetailsRequest) returns (GetDoctorDetailsResponse);
+  rpc VerifyDoctor(VerifyDoctorRequest) returns (VerifyDoctorResponse);
+  
+  // Patient management
+  rpc ListPatients(ListPatientsRequest) returns (ListPatientsResponse);
+  rpc GetPatientDetails(GetPatientDetailsRequest) returns (GetPatientDetailsResponse);
+}

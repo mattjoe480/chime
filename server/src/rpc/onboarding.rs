@@ -56,6 +56,7 @@ impl onboarding_server::Onboarding for OnboardingServerImpl {
                     user_id: Set(Uuid::parse_str(&doctor_data.user_id)
                         .map_err(|_| Status::invalid_argument("Invalid user ID format"))?),
                     medical_license: Set(doctor_data.medical_license),
+                    is_verified: Set(false),
                     specialization: Set(DoctorSpecialization::from(doctor_data.specialization)),
                     years_of_experience: Set(doctor_data.years_of_experience),
                     hospital_affiliation: Set(doctor_data.hospital_affiliation),

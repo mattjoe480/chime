@@ -2,8 +2,8 @@
 
 use super::sea_orm_active_enums::DoctorSpecialization;
 use sea_orm::entity::prelude::*;
-
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "doctor")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -15,6 +15,7 @@ pub struct Model {
     pub specialization: DoctorSpecialization,
     pub years_of_experience: i32,
     pub hospital_affiliation: String,
+    pub is_verified: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
