@@ -1,18 +1,13 @@
-import { useSession, signIn, signOut } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/themeToggle";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TbLogout } from "react-icons/tb";
+import {signOut, useSession} from "next-auth/react";
+import {Button} from "@/components/ui/button";
+import {ThemeToggle} from "@/components/themeToggle";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {TbLogout} from "react-icons/tb";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import {useRouter} from "next/navigation";
 import Image from "next/image";
-import { getDashboardUrl } from "@/lib/utils";
+import {getDashboardUrl} from "@/lib/utils";
 
 const getInitials = (name: string | null | undefined) => {
   if (!name) return "U";
@@ -92,7 +87,7 @@ export const NavBar = () => {
             </div>
           </div>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <span className="font-logirent text-2xl tracking-wide text-primary">
+            <span className="font-logirent text-2xl tracking-wide text-primary select-none">
               Chime
             </span>
           </div>
@@ -105,7 +100,7 @@ export const NavBar = () => {
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8 border border-primary/10">
                       <AvatarImage
-                        src={session?.user?.image || ""}
+                        src={session?.user?.image || undefined}
                         alt={getUserName()}
                       />
                       <AvatarFallback>{getAvatarFallback()}</AvatarFallback>

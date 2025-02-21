@@ -218,7 +218,7 @@ const Home = () => {
       "@type": "ContactPoint",
       telephone: "1-800-HEALTH",
       contactType: "customer service",
-      availableLanguage: ["English", "Hindi"],
+      availableLanguage: ["English"],
     },
   };
 
@@ -229,9 +229,9 @@ const Home = () => {
       <div className="flex min-h-screen flex-col">
         <div className="flex-1 overflow-hidden bg-background">
           <div className="pointer-events-none fixed inset-0 z-0">
-            <div className="absolute -left-1/4 -top-1/4 h-[600px] w-[600px] animate-pulse rounded-full bg-blue-500/30 blur-[130px]" />
-            <div className="absolute -right-1/4 top-1/4 h-[500px] w-[500px] animate-pulse rounded-full bg-purple-500/30 blur-[130px]" />
-            <div className="absolute -bottom-1/4 -left-1/4 h-[700px] w-[700px] animate-pulse rounded-full bg-cyan-500/30 blur-[130px]" />
+            <div className="absolute -left-1/4 -top-1/4 h-[500px] w-[500px] animate-pulse rounded-full bg-gradient-to-b from-[#020404] via-[#01476e] to-[#006caa] blur-[128px]" />
+            <div className="absolute -right-1/4 top-1/4 h-[400px] w-[400px] animate-pulse rounded-full bg-gradient-to-b from-[#020404] via-[#01476e] to-[#006caa] blur-[128px]" />
+            <div className="absolute -bottom-1/4 -left-1/4 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-b from-[#020404] via-[#01476e] to-[#006caa] blur-[128px]" />
           </div>
 
           <main className="relative z-10">

@@ -47,11 +47,11 @@ export const StatsSection = () => {
               <div className="absolute bottom-1/4 right-1/4 h-64 w-64 animate-pulse rounded-full bg-purple-500/10 blur-3xl"/>
             </div>
 
-            <div className="container px-4">
+            <div className="container px-4 select-none">
               <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
                 <MagicCard
 
-                        className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+                        className="group rounded-2xl border bg-card/50 p-6 transition-all backdrop-blur-sm"
                         gradientFrom="#3B82F6"
                         gradientTo="#8B5CF6"
                         gradientColor="rgb(var(shadow-primary))"
@@ -61,7 +61,7 @@ export const StatsSection = () => {
                 </MagicCard>
 
                 <MagicCard
-                        className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+                        className="group rounded-2xl border bg-card/50 p-6 transition-allhover:shadow-primary/20 backdrop-blur-sm"
                         gradientFrom="#8B5CF6"
                         gradientTo="#EC4899"
                         gradientColor="rgb(var(shadow-primary))"
@@ -73,7 +73,7 @@ export const StatsSection = () => {
                 </MagicCard>
 
                 <MagicCard
-                        className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+                        className="group rounded-2xl border bg-card/50 p-6 transition-allhover:shadow-primary/20 backdrop-blur-sm"
                         gradientFrom="#10B981"
                         gradientTo="#3B82F6"
                         gradientColor="rgb(var(shadow-primary))"
@@ -85,7 +85,7 @@ export const StatsSection = () => {
                 </MagicCard>
 
                 <MagicCard
-                        className="group rounded-2xl border bg-card/50 p-6 transition-all hover:bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm"
+                        className="group rounded-2xl border bg-card/50 p-6 transition-allhover:shadow-primary/20 backdrop-blur-sm"
                         gradientFrom="#F59E0B"
                         gradientTo="#8B5CF6"
                         gradientColor="rgb(var(shadow-primary))"

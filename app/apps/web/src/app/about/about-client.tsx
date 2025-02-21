@@ -1,7 +1,7 @@
 "use client";
 
-import { NavBar } from "@/components/nav-bar";
-import { Footer } from "@/components/footer";
+import {NavBar} from "@/components/nav-bar";
+import {Footer} from "@/components/footer";
 
 // Move all the component code here
 export function AboutPageClient() {
@@ -11,9 +11,10 @@ export function AboutPageClient() {
       <div className="min-h-screen bg-background">
         {/* Gradient background */}
         <div className="pointer-events-none absolute inset-0 z-0">
-          <div className="absolute -left-1/4 -top-1/4 h-[500px] w-[500px] animate-pulse rounded-full bg-blue-500/20 blur-[128px]" />
-          <div className="absolute -right-1/4 top-1/4 h-[400px] w-[400px] animate-pulse rounded-full bg-purple-500/20 blur-[128px]" />
-          <div className="absolute -bottom-1/4 -left-1/4 h-[600px] w-[600px] animate-pulse rounded-full bg-cyan-500/20 blur-[128px]" />
+          <div className="absolute -left-1/4 -top-1/4 h-[500px] w-[500px] animate-pulse rounded-full bg-gradient-to-b from-[#020404] via-[#01476e] to-[#006caa] blur-[128px]" />
+          <div className="absolute -right-1/4 top-1/4 h-[400px] w-[400px] animate-pulse rounded-full bg-gradient-to-b from-[#020404] via-[#01476e] to-[#006caa] blur-[128px]" />
+          <div className="absolute -bottom-1/4 -left-1/4 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-b from-[#020404] via-[#01476e] to-[#006caa] blur-[128px]" />
+
         </div>
 
         {/* Content */}
