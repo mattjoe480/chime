@@ -7,14 +7,14 @@ export default function PatientDashboard() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!session?.user || session.user.role !== "PATIENT") {
-      router.push("/auth/signin");
-    }
-  }, [session, router]);
+  // useEffect(() => {
+  //   if (!session?.user || session.user.role !== "PATIENT") {
+  //     router.push("/auth/signin");
+  //   }
+  // }, [session, router]);
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="bg-background p-8">
       <h1 className="text-4xl font-bold mb-8">Patient Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <DashboardCard

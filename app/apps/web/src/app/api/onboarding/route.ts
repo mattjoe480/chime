@@ -56,6 +56,7 @@ export async function POST(req: Request) {
             onboardingRequest,
             session.user.chime_access_token
     );
+    console.log("Onboarding response:" + response);
 
     return NextResponse.json({
       ...response,

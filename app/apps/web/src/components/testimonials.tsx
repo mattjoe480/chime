@@ -6,19 +6,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
+    name: "Amal Krishna",
     role: "Patient",
     content:
       "Chime has transformed how I manage my healthcare. The ease of scheduling appointments and accessing my records is incredible.",
   },
   {
-    name: "Dr. Michael Chen",
+    name: "Jacob Vargeese",
     role: "Healthcare Provider",
     content:
       "As a healthcare provider, Chime helps me stay connected with my patients and manage my practice more efficiently.",
   },
   {
-    name: "Emily Rodriguez",
+    name: "Dr. Surendran Nair",
     role: "Patient",
     content:
       "The AI health assistant is like having a knowledgeable friend available 24/7. It's helped me make better health decisions.",

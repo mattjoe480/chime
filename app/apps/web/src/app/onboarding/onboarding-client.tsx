@@ -67,7 +67,13 @@ export function OnboardingClient() {
         description: "Your profile has been successfully completed.",
       });
 
-      router.push("/dashboard");
+      // Redirect based on user type
+      if (userType === "patient") {
+        router.push("/patient/dashboard");
+      } else {
+        router.push("/doctor/dashboard");
+      }
+      
     } catch (error) {
       toast({
         title: "Error",

@@ -1,6 +1,5 @@
-use crate::db::role::Roles;
+use crate::controllers::initialize::get_postgres_conn;
 use crate::entity::{doctor, patient, users};
-use crate::entity::sea_orm_active_enums::DoctorSpecialization;
 use crate::types::admin::{
     admin_service_server::AdminService, Doctor, GetDoctorDetailsRequest,
     GetDoctorDetailsResponse, ListDoctorsRequest, ListDoctorsResponse, ListPatientsRequest,
@@ -9,23 +8,18 @@ use crate::types::admin::{
     ListUsersRequest, ListUsersResponse, UpdateUserRequest, UpdateUserResponse, AdminUser,
 };
 use crate::types::auth::Status;
-use sea_orm::{ActiveEnum, ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, Set};
-use std::sync::Arc;
+use sea_orm::{ActiveEnum, ActiveModelTrait, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, Set};
 use tonic::{async_trait, Request, Response};
 use tracing::error;
 
-pub struct AdminServiceImpl {
-    db: Arc<DatabaseConnection>,
-}
+pub struct AdminServiceImpl;
 
 impl AdminServiceImpl {
-    pub fn new(db: Arc<DatabaseConnection>) -> Self {
-        Self { db }
-    }
 
     async fn convert_to_proto_doctor(&self, db_doctor: doctor::Model) -> Doctor {
+        let db = get_postgres_conn().await;
         let user = users::Entity::find_by_id(db_doctor.user_id)
-            .one(&*self.db)
+            .one(&db)
             .await
             .unwrap()
             .unwrap();
@@ -46,8 +40,9 @@ impl AdminServiceImpl {
     }
 
     async fn convert_to_proto_patient(&self, db_patient: patient::Model) -> Patient {
+        let db = get_postgres_conn().await;
         let user = users::Entity::find_by_id(db_patient.user_id)
-            .one(&*self.db)
+            .one(&db)
             .await
             .unwrap()
             .unwrap();
@@ -90,6 +85,7 @@ impl AdminService for AdminServiceImpl {
         let req = request.into_inner();
         let page = req.page as u64;
         let per_page = req.limit as u64;
+        let db = get_postgres_conn().await;
 
         let mut query = doctor::Entity::find();
 
@@ -105,12 +101,12 @@ impl AdminService for AdminServiceImpl {
         query = query.filter(doctor::Column::IsVerified.eq(req.verification_status));
 
         // Get total count
-        let total = query.clone().count(&*self.db).await.unwrap();
+        let total = query.clone().count(&db).await.unwrap();
 
         // Get paginated results
         let paginator = query
             .order_by_asc(doctor::Column::Id)
-            .paginate(&*self.db, per_page);
+            .paginate(&db, per_page);
         let total_pages = paginator.num_pages().await.unwrap();
         
         let mut doctors = Vec::new();
@@ -131,9 +127,9 @@ impl AdminService for AdminServiceImpl {
         request: Request<GetDoctorDetailsRequest>,
     ) -> Result<Response<GetDoctorDetailsResponse>, tonic::Status> {
         let doctor_id = request.into_inner().doctor_id;
-        
+        let db = get_postgres_conn().await;
         match doctor::Entity::find_by_id(uuid::Uuid::parse_str(&doctor_id).unwrap())
-            .one(&*self.db)
+            .one(&db)
             .await
             .unwrap()
         {
@@ -157,9 +153,9 @@ impl AdminService for AdminServiceImpl {
     ) -> Result<Response<VerifyDoctorResponse>, tonic::Status> {
         let req = request.into_inner();
         let doctor_id = uuid::Uuid::parse_str(&req.doctor_id).unwrap();
-
+        let db = get_postgres_conn().await;
         let doctor = match doctor::Entity::find_by_id(doctor_id)
-            .one(&*self.db)
+            .one(&db)
             .await
             .unwrap()
         {
@@ -177,8 +173,8 @@ impl AdminService for AdminServiceImpl {
         
         // TODO: Add is_verified field to doctor table
         // doctor_active.is_verified = Set(req.verify);
-        
-        match doctor_active.update(&*self.db).await {
+        let db = get_postgres_conn().await;
+        match doctor_active.update(&db).await {
             Ok(updated_doctor) => {
                 let proto_doctor = self.convert_to_proto_doctor(updated_doctor).await;
                 Ok(Response::new(VerifyDoctorResponse {
@@ -212,12 +208,13 @@ impl AdminService for AdminServiceImpl {
         }
 
         // Get total count
-        let total = query.clone().count(&*self.db).await.unwrap();
+        let db = get_postgres_conn().await;
+        let total = query.clone().count(&db).await.unwrap();
 
         // Get paginated results
         let paginator = query
             .order_by_asc(patient::Column::Id)
-            .paginate(&*self.db, per_page);
+            .paginate(&db, per_page);
         let total_pages = paginator.num_pages().await.unwrap();
 
         let mut patients = Vec::new();
@@ -238,9 +235,9 @@ impl AdminService for AdminServiceImpl {
         request: Request<GetPatientDetailsRequest>,
     ) -> Result<Response<GetPatientDetailsResponse>, tonic::Status> {
         let patient_id = request.into_inner().patient_id;
-        
+        let db = get_postgres_conn().await;
         match patient::Entity::find_by_id(uuid::Uuid::parse_str(&patient_id).unwrap())
-            .one(&*self.db)
+            .one(&db)
             .await
             .unwrap()
         {
@@ -281,10 +278,11 @@ impl AdminService for AdminServiceImpl {
             query = query.filter(users::Column::Role.eq(req.role_filter));
         }
 
-        let total = query.clone().count(&*self.db).await.unwrap();
+        let db = get_postgres_conn().await;
+        let total = query.clone().count(&db).await.unwrap();
         let paginator = query
             .order_by_asc(users::Column::Name)
-            .paginate(&*self.db, per_page);
+            .paginate(&db, per_page);
         let total_pages = paginator.num_pages().await.unwrap();
 
         let mut users = Vec::new();
@@ -306,8 +304,9 @@ impl AdminService for AdminServiceImpl {
     ) -> Result<Response<UpdateUserResponse>, tonic::Status> {
         let req = request.into_inner();
         let user_id = uuid::Uuid::parse_str(&req.user_id).unwrap();
+        let db = get_postgres_conn().await;
 
-        let user = match users::Entity::find_by_id(user_id).one(&*self.db).await.unwrap() {
+        let user = match users::Entity::find_by_id(user_id).one(&db).await.unwrap() {
             Some(u) => u,
             None => {
                 return Ok(Response::new(UpdateUserResponse {
@@ -329,8 +328,8 @@ impl AdminService for AdminServiceImpl {
         // if let Some(is_active) = req.is_active {
         //     user_active.is_active = Set(is_active);
         // }
-
-        match user_active.update(&*self.db).await {
+        let db = get_postgres_conn().await;
+        match user_active.update(&db).await {
             Ok(updated_user) => {
                 let proto_user = self.convert_to_proto_admin_user(updated_user).await;
                 Ok(Response::new(UpdateUserResponse {

@@ -251,9 +251,8 @@ const Home = () => {
                     in Perfect Harmony
                   </h1>
                   <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-                    Experience healthcare that resonates with your life. Chime
-                    brings you seamless appointments, expert care, and digital
-                    health management in one harmonious platform.
+                  Experience AI-powered healthcare tailored to your life.
+                   Chime uses smart technology to simplify appointments, connect you with experts, and manage your health effortlessly.
                   </p>
                 </div>
 
@@ -274,11 +273,10 @@ const Home = () => {
                             <div className="h-5 w-5 text-primary">
                               <TbCalendar size="100%" />
                             </div>
-                            Easy Scheduling
+                            Gene Based Analysis
                           </CardTitle>
                           <CardDescription>
-                            Book appointments with your healthcare providers
-                            instantly, 24/7.
+                          Genetic Insights: AI-powered analysis predicting health risks based on your unique DNA.
                           </CardDescription>
                         </CardHeader>
                       </Card>

@@ -2,8 +2,12 @@
 
 pub mod prelude;
 
+pub mod appointment;
 pub mod doctor;
+pub mod medical_record;
 pub mod patient;
+pub mod prescription;
 pub mod roles;
 pub mod sea_orm_active_enums;
+pub mod test_result;
 pub mod users;

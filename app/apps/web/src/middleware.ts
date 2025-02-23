@@ -1,7 +1,13 @@
 import {NextResponse} from "next/server";
 import {auth} from "@/auth";
 import { logger } from "@/next-logger.config";
+const DEBUG_MODE = process.env.NODE_ENV === "development";
 export async function middleware(request: Request) {
+  if (DEBUG_MODE) {
+    logger.info("Debug mode: bypassing auth checks");
+    return NextResponse.next();
+  }
+  
   const session = await auth();
   const pathname = new URL(request.url).pathname;
   if (pathname.startsWith("/auth/signin")) {

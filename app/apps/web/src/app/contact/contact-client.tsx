@@ -105,11 +105,11 @@ export function ContactPageClient() {
                           href="tel:1-800-HEALTH"
                           className="hover:text-primary"
                         >
-                          1-800-HEALTH
+                          1800-2800-30
                         </a>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Available 24/7 for urgent matters
+                        Available 24/7
                       </p>
                     </div>
                   </div>
@@ -121,9 +121,8 @@ export function ContactPageClient() {
                     <div>
                       <h3 className="font-semibold">Location</h3>
                       <p className="text-sm text-muted-foreground">
-                        123 Medical Center Dr.
-                        <br />
-                        San Francisco, CA 94143
+                      Kumarapuram
+                        Trivandrum 695011 
                       </p>
                     </div>
                   </div>
@@ -135,11 +134,7 @@ export function ContactPageClient() {
                     <div>
                       <h3 className="font-semibold">Business Hours</h3>
                       <p className="text-sm text-muted-foreground">
-                        Monday - Friday: 9:00 AM - 6:00 PM
-                        <br />
-                        Saturday: 10:00 AM - 4:00 PM
-                        <br />
-                        Sunday: Closed
+                        24/7
                       </p>
                     </div>
                   </div>

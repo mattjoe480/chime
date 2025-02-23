@@ -3,6 +3,7 @@ const { GrpcReflection } = require('grpc-js-reflection-client');
 const grpc =  require('@grpc/grpc-js');
 import {ListMethodsType} from "grpc-js-reflection-client/dist/Types/ListMethodsType";
 import { logger } from "@/next-logger.config"
+import { Metadata } from "@grpc/grpc-js";
 const url = process.env.GRPC_SERVICE_URL!;
 const client = new grpc.Client(url, grpc.credentials.createInsecure());
 const reflectionClient = new GrpcReflection(url, grpc.ChannelCredentials.createInsecure());
@@ -26,7 +27,14 @@ export async function getService<T>(service: string){
         servicePath: service
     })
 }
-export function  addAuthToken(authToken: string){
+
+export function getAuthMetadata(token: string): Metadata {
+    const metadata = new Metadata();
+    metadata.set('authorization', `Bearer ${token}`);
+    return metadata;
+}
+
+export function  addAuthToken(authToken: string): Metadata {
     const metadata = new grpc.Metadata();
     metadata.add('authorization', `Bearer ${authToken}`);  // Add the token to the metadata
     return metadata;

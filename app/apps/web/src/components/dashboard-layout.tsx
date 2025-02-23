@@ -8,6 +8,7 @@ import {
   Users,
   Settings,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
@@ -31,6 +32,11 @@ const roleLinks = {
       label: "Medical Records",
       href: "/patient/records",
       icon: <FileText size={20} className="flex-shrink-0" />,
+    },
+    {
+      label: "Chat with AI",
+      href: "/patient/chat",
+      icon: <MessageSquare size={20} className="flex-shrink-0" />,
     },
   ],
   doctor: [
@@ -68,7 +74,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const role = session?.user?.role?.toLowerCase() || "none";
   const links = roleLinks[role as keyof typeof roleLinks] || roleLinks.patient;
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const userInitials = session?.user?.name
     ?.split(" ")

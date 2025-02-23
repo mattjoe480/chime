@@ -1,4 +1,4 @@
-use crate::controllers::initialize::get_redis_conn;
+use crate::controllers::initialize::{get_postgres_conn, get_redis_conn};
 use crate::entity::users;
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
@@ -40,20 +40,21 @@ impl JwtToken for RefreshTokenClaims {}
 
 impl AccessTokenClaims {
     pub async fn new(uid: &str) -> Self {
+        let db = get_postgres_conn().await;
         let ttl = env::var("JWT_TTL")
             .expect("JWT_TTL must be set!!!")
             .parse::<i64>()
             .unwrap();
 
-        let user = users::Entity::find_by_id(uid)
-            .one(DB.get().unwrap())
+        let user = users::Entity::find_by_id(uuid::Uuid::parse_str(uid).unwrap())
+            .one(&db)
             .await
             .unwrap()
             .unwrap();
 
         Self {
             sub: uid.to_string(),
-            role: user.role.to_value(),
+            role: format!("{:?}", user.role).to_uppercase(),
             exp: (Utc::now() + Duration::minutes(ttl)).timestamp() as usize,
             iat: Utc::now().timestamp() as usize,
             aud: "localhost".to_string(),

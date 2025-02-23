@@ -1,17 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export default function DoctorDashboard() {
   const { data: session } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!session?.user || session.user.role !== "DOCTOR") {
-      router.push("/auth/signin");
-    }
-  }, [session, router]);
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -19,15 +10,15 @@ export default function DoctorDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <DashboardCard
           title="Today's Appointments"
-          description="View and manage today's patient appointments"
+          description="View your scheduled appointments for today"
         />
         <DashboardCard
-          title="Patient Records"
-          description="Access your patients' medical records"
+          title="Patient Overview"
+          description="Quick access to patient information"
         />
         <DashboardCard
-          title="Schedule"
-          description="Manage your availability and schedule"
+          title="Recent Activity"
+          description="View your recent medical activities"
         />
       </div>
     </div>

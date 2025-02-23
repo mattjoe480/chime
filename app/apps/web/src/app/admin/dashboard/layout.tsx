@@ -3,7 +3,7 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | ChimeUp Healthcare",
-  description: "Manage and monitor ChimeUp's healthcare platform.",
+  description: "Manage your healthcare system with ChimeUp.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
